@@ -16,7 +16,8 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "user_id")
+    private int userId;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -24,4 +25,12 @@ public class User {
     private String lastName;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+    @Column(name = "proof_of_id")
+    private String proofOfId;
+    @Column(name = "proof_of_address")
+    private String proofOfAddress;
+    @Column(name = "financial_info")
+    private String financialInfo;
+    @Column(name = "credit_score")
+    private String creditScore;
 }
