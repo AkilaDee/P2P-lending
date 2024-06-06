@@ -27,7 +27,7 @@ function Copyright(props) {
 }
 
 // TODO remove, this demo shouldn't need to reset the theme.
-
+// const classes = useStyles();
 const defaultTheme = createTheme();
 
 export default function SignUp() {
@@ -100,6 +100,66 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                />
+              </Grid>
+              <Grid item xs={12} sm={5} md={5}>
+                <Typography variant="body2" display="block" align='left'>
+                  Credit Score *
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={7} md={7}>
+                <input
+                  accept="image/*"
+                  // onChange={handleRegisterDocs}
+                  // className={classes.input}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                />
+              </Grid>
+              <Grid item xs={12} sm={5} md={5}>
+                <Typography variant="body2" display="block" align='left'>
+                  Financial Information *
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={7} md={7}>
+                <input
+                  accept="image/*"
+                  // onChange={handleRegisterDocs}
+                  // className={classes.input}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                />
+              </Grid>
+              <Grid item xs={12} sm={5} md={5}>
+                <Typography variant="body2" display="block" align='left'>
+                  Proof of Identification *
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={7} md={7}>
+                <input
+                  accept="image/*"
+                  // onChange={handleRegisterDocs}
+                  // className={classes.input}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                />
+              </Grid>
+              <Grid item xs={12} sm={5} md={5}>
+                <Typography variant="body2" display="block" align='left'>
+                  Proof of Address *
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={7} md={7}>
+                <input
+                  accept="image/*"
+                  // onChange={handleRegisterDocs}
+                  // className={classes.input}
+                  id="contained-button-file"
+                  multiple
+                  type="file"
                 />
               </Grid>
               <Grid item xs={12}>
