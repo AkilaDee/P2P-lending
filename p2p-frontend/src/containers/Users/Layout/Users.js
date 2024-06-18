@@ -1,41 +1,41 @@
 import React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // core components
-import Navbar from "./"
+import Navbar from "../../../components/Dashboard/Navbar/Navbar.js"; // Assuming you have a Navbar component in the same directory
 import Footer from "../../../components/Dashboard/Footer/Footer.js";
 import Sidebar from "../../../components/Dashboard/Sidebar/Sidebar.js";
-//import FixedPlugin from "../../../components/Dashboard/FixedPlugin/FixedPlugin.js";
+// import FixedPlugin from "../../../components/Dashboard/FixedPlugin/FixedPlugin.js";
 
-import routes from "../../../containers/admin/routes/routes"
+import routes from "../../../containers/Users/Routes/Routes.js"
 
-import styles from "../../../assets/jss/material-dashboard-react/layouts/adminStyle.js";
+import styles from "../../../components/Dashboard/Styles/AdminStyle.js";
 
-import bgImage from "../../../assets/images/admin-bg.jpg";
-import logo from "../../../assets/images/medLink.jpg";
+import bgImage from "../../../components/Dashboard/Images/two.jpg";
+import logo from "../../../components/Dashboard/Images/one.jpg";
 
 let ps;
 
 const switchRoutes = (
-  <Switch>
+  <Routes>
     {routes.map((prop, key) => {
       if (prop.layout === "/admin") {
         return (
           <Route
             path={prop.layout + prop.path}
-            component={prop.component}
+            element={<prop.component />}
             key={key}
           />
         );
       }
       return null;
     })}
-    <Redirect from="/admin" to="/admin/dashboard" />
-  </Switch>
+    <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
+  </Routes>
 );
 
 const useStyles = makeStyles(styles);

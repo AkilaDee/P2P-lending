@@ -25,6 +25,8 @@ public class User {
     private String lastName;
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+    @Column(name = "password", nullable = false)
+    private String password;
     @Column(name = "proof_of_id")
     private String proofOfId;
     @Column(name = "proof_of_address")

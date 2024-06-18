@@ -1,5 +1,5 @@
 //import routes from "routes";
-import routes from "../routes/routes";
+import routes from "../Routes/Routes";
 
 export const useRouteName = () => {
   let name = "";

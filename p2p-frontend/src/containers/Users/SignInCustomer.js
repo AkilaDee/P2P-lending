@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,6 +13,9 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useDispatch, useSelector } from 'react-redux';
+import { Navigate } from 'react-router-dom';
+import { isuserLoggedIn, login } from '../../Actions/Auth.ActionsUser.js';
 
 function Copyright(props) {
   return (
@@ -26,19 +30,34 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignInCustomer() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const auth = useSelector(state => state.auth);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!auth.authenticate) {
+      dispatch(isuserLoggedIn());
+    }
+  }, [auth.authenticate, dispatch]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
+    const data = new FormData(event.currentTarget); // event.currentTarget will be the form element
+    const user = {
       email: data.get('email'),
       password: data.get('password'),
-    });
+    };
+    dispatch(login(user));
   };
+
+  if (auth.authenticate) {
+    return <Navigate to={'/dashboard'} />
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -68,6 +87,8 @@ export default function SignInCustomer() {
               name="email"
               autoComplete="email"
               autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -78,6 +99,8 @@ export default function SignInCustomer() {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}

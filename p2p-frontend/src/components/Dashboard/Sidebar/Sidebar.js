@@ -12,10 +12,10 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import Icon from "@material-ui/core/Icon";
 // core components
-import CustomerNavbarLinks from "../Navbars/CustomerNavbarLinks.js";
+import NavbarLinks from "../Navbar/NavbarLinks.js";
 //*import RTLNavbarLinks from "../Navbars/RTLNavbarLinks.js";
 
-import styles from "../../../assets/jss/material-dashboard-react/components/sidebarStyle.js";
+import styles from "../Styles/SidebarStyle.js";
 
 const useStyles = makeStyles(styles);
 
@@ -119,7 +119,7 @@ export default function Sidebar(props) {
         >
           {brand}
           <div className={classes.sidebarWrapper}>
-            {props.rtlActive ? <RTLNavbarLinks /> : <CustomerNavbarLinks />}
+            {props.rtlActive ? <RTLNavbarLinks /> : <NavbarLinks />}
             {links}
           </div>
           {image !== undefined ? (

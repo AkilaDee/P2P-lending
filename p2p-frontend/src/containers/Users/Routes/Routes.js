@@ -10,7 +10,7 @@ const dashboardRoutes = [
         name: "Dashboard",
         icon: Dashboard,
         component: DashboardPage,
-        layout: "/user",
+        layout: "/User",
       },
 
       
