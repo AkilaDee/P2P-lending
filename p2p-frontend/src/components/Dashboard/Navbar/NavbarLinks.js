@@ -68,7 +68,7 @@ export default function CustomerNavbarLinks() {
 
   return (
     <div>
-      <Link href="/admin" color="inherit">
+      <Link href="/user" color="inherit">
         <Button
           color={window.innerWidth > 959 ? "transparent" : "white"}
           justIcon={window.innerWidth > 959}

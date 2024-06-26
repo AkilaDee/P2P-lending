@@ -35,7 +35,6 @@ const defaultTheme = createTheme();
 export default function SignInCustomer() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const auth = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
@@ -47,7 +46,7 @@ export default function SignInCustomer() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget); // event.currentTarget will be the form element
+    const data = new FormData(event.currentTarget);
     const user = {
       email: data.get('email'),
       password: data.get('password'),
@@ -56,7 +55,7 @@ export default function SignInCustomer() {
   };
 
   if (auth.authenticate) {
-    return <Navigate to={'/dashboard'} />
+    return <Navigate to={'/user/dashboard'} />
   }
 
   return (

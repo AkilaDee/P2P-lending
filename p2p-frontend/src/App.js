@@ -1,16 +1,14 @@
-import './App.css';
-import { Routes, Route } from 'react-router-dom'; // Remove BrowserRouter alias
-import Signin from './containers/Users/SignInCustomer';
+import React from 'react';
+import { Routes, Route, Router } from 'react-router-dom';
+import Signin from './containers/Users/SignInUser';
 import MainLandingPage from './containers/Users/MainLandingPage';
 import SignUp from './containers/Users/Signup';
 import PrivateRoute from './components/HOC/PrivateRoute';
+import User from './containers/Users/Layout/User';
+import LendRequests from './containers/Users/LendRequests';
 import Dashboard from './containers/Users/Dashboard';
 import LoanRequests from './containers/Users/LoanRequests';
-import LendRequests from './containers/Users/LendRequests';
-import User from './containers/Users/Layout/Users.js';
-
-// Mock authentication status for demonstration
-const isAuthenticated = true; // Replace with your actual authentication logic
+// import Routes from './containers/Users/Routes/';
 
 function App() {
   return (
@@ -19,14 +17,18 @@ function App() {
         <Route path="/" element={<MainLandingPage />} />
         <Route path="/login" element={<Signin />} />
         <Route path="/register" element={<SignUp />} />
-
-        {/* Wrap protected routes with PrivateRoute */}
-        <Route element={<PrivateRoute />}>
-          <Route path="/user" element={<User />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/loanrequests" element={<LoanRequests />} />
-          <Route path="/lendrequests" element={<LendRequests />} />
+        <Route path="/user/*" element={<PrivateRoute />}>
+          <Route path="*" element={<User />} />
         </Route>
+{/* *       <Route element={<User />} path="/user" >
+          <Route element={<Dashboard/>} path="/user/dashboard" />
+          <Route element={<LoanRequests/>} path="/user/loanrequests" />
+          <Route element={<LendRequests/>} path="/user/lendrequests" />
+          
+           
+
+        </Route>
+        */}
       </Routes>
     </div>
   );

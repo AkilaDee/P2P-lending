@@ -122,6 +122,7 @@ export default function LoanRequests() {
 //   const rows = data; 
   const rows = ['ddd','dsdsds']; 
 
+  console.log("ggggggggggggggg");
 
   return (
     
