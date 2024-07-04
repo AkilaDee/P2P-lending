@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { isuserLoggedIn, login } from '../../Actions/Auth.ActionsUser.js';
 
 function Copyright(props) {
@@ -55,7 +55,7 @@ export default function SignInCustomer() {
   };
 
   if (auth.authenticate) {
-    return <Navigate to={'/user/dashboard'} />
+    return <Redirect to={'/user/dashboard'} />
   }
 
   return (

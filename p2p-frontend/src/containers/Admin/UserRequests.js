@@ -36,45 +36,68 @@ export default function LendRequests() {
   const classes = useStyles();
   const [searchTerm, setSearchTerm] = useState(""); //for search function
 
-  const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [selectedLoanRequestId, setSelectedLoanRequestId] = useState(null);
-
-  // Function to open the confirm dialog
-  const handleClickOpenConfirm = (loanRequestId) => {
-    // const userId = window.localStorage.getItem('userId');
-    
-    setSelectedLoanRequestId(loanRequestId);
-    setOpenConfirm(true);
+  //popup dialogbox
+  const [openReject, setOpenReject] = React.useState(false);
+  const handleClickOpenReject = (pharmacyid) => {
+    setOpenReject(true);
+//     setPharmacyid(pharmacyid);
   };
-
-  // Function to close the confirm dialog
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-    setSelectedLoanRequestId(null);
+  const handleCloseReject = () => {
+    setOpenReject(false);
   };
+  
+  //backend connection for reject pharmacy
+//   const [pharmacyid,setPharmacyid] = useState();
+//   const [rejectreason, setRejectreason] = useState();
+//   const rejectPharmacy = () => {
+//     const token = window.localStorage.getItem('token');
+//     axios.post(`${backendUrl}/admin/rejectpharmacy`, {pharmacyid:pharmacyid,rejectreason:rejectreason}, {
+//       headers: {
+//         'Authorization': token ? `Bearer ${token}` : ''
+//       },
+//   }).then((response)=>{
+//       console.log(response);
+//       getdata();
+//       handleCloseReject();
+//   }).catch((err)=>{
+//       console.log(err);
+//   });
+//  };
+  
+//   //backend connection for accept pharmacy
+//   const acceptPharmacy = (pharmacyid) => {
+//       const token = window.localStorage.getItem('token');
+//       axios.post(`${backendUrl}/admin/acceptpharmacy`, {pharmacyid:pharmacyid}, {
+//         headers: {
+//           'Authorization': token ? `Bearer ${token}` : ''
+//         },
+//     }).then((response)=>{
+//         console.log(response);
+//         getdata();
+//     }).catch((err)=>{
+//         console.log(err);
+//     });
+//   };
+  const [open, setOpen] = React.useState(false);
+  const [doc1,setDoc1]= React.useState('');
+  const [doc2,setDoc2]= React.useState('');
+  const [doc3,setDoc3]= React.useState('');
 
-  // Function to handle the confirm action
-  const handleConfirm = () => {
-    const user = JSON.parse(window.localStorage.getItem('user'));
-   const userId = user.userId;
-    axios.post(`${backendUrl}/users/loanrequests/accept`, { loanRequestId: selectedLoanRequestId, acceptorId: userId })
-      .then((response) => {
-        console.log(response);
-        fetchData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setOpenConfirm(false);
+  const handleClickOpen = (document1,document2,document3) => {
+    setDoc1(document1);
+    setDoc2(document2);
+    setDoc3(document3);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
   };
 
  //backend connection
  const [data, setData] = useState([]);
  const fetchData = () => {
-  const user = JSON.parse(window.localStorage.getItem('user'));
-   const userId = user.userId;
-  //  console.log("xxxxx",userId);
-   axios.post(`${backendUrl}/users/loanrequests/exclude`, { userId: userId })
+   const userId = window.localStorage.getItem('userId');
+   axios.post(`${backendUrl}/lendrequests/exclude`, { userId: userId })
      .then(res => {
        setData(res.data); // Set the received data
      })
@@ -85,15 +108,15 @@ export default function LendRequests() {
   React.useEffect(()=>{
     fetchData();
   },[]);
-  // React.useEffect(() => {
-  //   console.log('Selected loan request ID changed:', selectedLoanRequestId);
-  // }, [selectedLoanRequestId]);
+
   const columns = [
     { id: 'amount', label: 'Amount'},
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
-    { id: 'createdAt', label: 'Date'},
-    { id: 'accept', label: 'Accept'},];
+    { id: 'location', label: 'Location'},
+    { id: 'document', label: 'Documents'},
+    { id: 'activate', label: 'Activate'},
+    { id: 'reject', label: 'Reject'},];
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
 
@@ -104,7 +127,7 @@ export default function LendRequests() {
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Loan Requests  </h4>
+            <h4 className={classes.cardTitleWhite}>Lend Requests  </h4>
           </CardHeader>
           <CardBody>
             <div>
@@ -151,25 +174,25 @@ export default function LendRequests() {
                           return(
                           <TableRow key={id}>
                             <TableCell align="left">
-                              {row.amount}
+                              {row.name}
                             </TableCell>
-                            <TableCell align="center">
-                              {row.interestRate}
+                            <TableCell align="left">
+                              {row.email}
                             </TableCell>
-                            <TableCell align="center">
-                              {row.repaymentPeriod}
+                            <TableCell align="left">
+                              {row.contactnumber}
                             </TableCell>
-                            <TableCell align="center">
-                              {row.createdAt}
+                            <TableCell align="left">
+                              {row.city}
                             </TableCell>
-                            {/* <TableCell align="left">
+                            <TableCell align="left">
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
-                            </TableCell> */}
-                            {/* <TableCell>
-                              <Button size='sm' color="primary" onClick={()=>acceptPharmacy(row.loanRequestId)}>Accept</Button>
-                            </TableCell> */}
-                            <TableCell align="center">
-                            <Button size="small" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId)}>Accept</Button> 
+                            </TableCell>
+                            <TableCell>
+                           {/* <Button size='sm' color="primary" onClick={()=>acceptPharmacy(row.pharmacyid)}>Accept</Button> */}
+                            </TableCell>
+                            <TableCell align="left">
+                            <Button size='sm' color="danger" onClick={()=>handleClickOpenReject(row.pharmacyid)}>Reject</Button>
                             </TableCell>
                           </TableRow>
                           );
@@ -184,29 +207,22 @@ export default function LendRequests() {
       </GridItem>
             
       {/* view documents dialogbox */}
-      
-
-      <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
-      <DialogTitle id="confirm-dialog-title">
-        Confirm Action
-      </DialogTitle>
-      <DialogContent dividers>
-        {/* <Typography gutterBottom> */}
-          Are you sure you want to accept it?
-        {/* </Typography> */}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseConfirm} color="primary">
-          No
-        </Button>
-        <Button onClick={handleConfirm} color="primary">
-          Yes
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+          Documents
+        </DialogTitle>
+        <DialogContent dividers>
+          {/* <PhotoSteps doc1={doc1} doc2={doc2} doc3={doc3}/> */}
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleClose} color="primary">
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* reject button dialogbox */}
-      {/* <Dialog open={openReject} onClose={handleCloseReject} aria-labelledby="form-dialog-title">
+      <Dialog open={openReject} onClose={handleCloseReject} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Reason to Reject the Request</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -234,8 +250,8 @@ export default function LendRequests() {
           {/* <Button onClick={()=>rejectPharmacy()} color="primary">
             Send
           </Button> */}
-        {/* </DialogActions>
-      </Dialog> */} 
+        </DialogActions>
+      </Dialog>
     </GridContainer>
   );
 }

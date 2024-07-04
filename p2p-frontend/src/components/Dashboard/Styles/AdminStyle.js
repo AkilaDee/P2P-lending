@@ -14,7 +14,7 @@ import {
         [theme.breakpoints.up('md')]: {
           width: `calc(100% - ${drawerWidth}px)`,
         },
-        overflow: 'auto',
+        overflow: 'hidden',
         position: 'relative',
         float: 'right',
         ...transition,

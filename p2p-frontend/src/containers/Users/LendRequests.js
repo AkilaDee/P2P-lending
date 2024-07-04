@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 import React,{useState} from "react";
-// import axios from 'axios';
-// import { backendUrl } from "../../urlConfig.js";
+import axios from 'axios';
+import { backendUrl } from '../../UrlConfig.js'
 import TableScrollbar from 'react-table-scrollbar'
 
 // @material-ui/core components
@@ -36,91 +36,63 @@ export default function LendRequests() {
   const classes = useStyles();
   const [searchTerm, setSearchTerm] = useState(""); //for search function
 
-  //popup dialogbox
-  const [openReject, setOpenReject] = React.useState(false);
-  const handleClickOpenReject = (pharmacyid) => {
-    setOpenReject(true);
-//     setPharmacyid(pharmacyid);
-  };
-  const handleCloseReject = () => {
-    setOpenReject(false);
-  };
-  
-  //backend connection for reject pharmacy
-//   const [pharmacyid,setPharmacyid] = useState();
-//   const [rejectreason, setRejectreason] = useState();
-//   const rejectPharmacy = () => {
-//     const token = window.localStorage.getItem('token');
-//     axios.post(`${backendUrl}/admin/rejectpharmacy`, {pharmacyid:pharmacyid,rejectreason:rejectreason}, {
-//       headers: {
-//         'Authorization': token ? `Bearer ${token}` : ''
-//       },
-//   }).then((response)=>{
-//       console.log(response);
-//       getdata();
-//       handleCloseReject();
-//   }).catch((err)=>{
-//       console.log(err);
-//   });
-//  };
-  
-//   //backend connection for accept pharmacy
-//   const acceptPharmacy = (pharmacyid) => {
-//       const token = window.localStorage.getItem('token');
-//       axios.post(`${backendUrl}/admin/acceptpharmacy`, {pharmacyid:pharmacyid}, {
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         },
-//     }).then((response)=>{
-//         console.log(response);
-//         getdata();
-//     }).catch((err)=>{
-//         console.log(err);
-//     });
-//   };
-  const [open, setOpen] = React.useState(false);
-  const [doc1,setDoc1]= React.useState('');
-  const [doc2,setDoc2]= React.useState('');
-  const [doc3,setDoc3]= React.useState('');
+  const [openConfirm, setOpenConfirm] = React.useState(false);
+  const [selectedLendRequestId, setSelectedLendRequestId] = useState(null);
 
-  const handleClickOpen = (document1,document2,document3) => {
-    setDoc1(document1);
-    setDoc2(document2);
-    setDoc3(document3);
-    setOpen(true);
+  // Function to open the confirm dialog
+  const handleClickOpenConfirm = (lendRequestId) => {
+    // const userId = window.localStorage.getItem('userId');
+    
+    setSelectedLendRequestId(lendRequestId);
+    setOpenConfirm(true);
   };
-  const handleClose = () => {
-    setOpen(false);
+
+  // Function to close the confirm dialog
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+    setSelectedLendRequestId(null);
+  };
+
+  // Function to handle the confirm action
+  const handleConfirm = () => {
+    const user = JSON.parse(window.localStorage.getItem('user'));
+   const userId = user.userId;
+    axios.post(`${backendUrl}/users/lendrequests/accept`, { lendRequestId: selectedLendRequestId, acceptorId: userId })
+      .then((response) => {
+        console.log(response);
+        fetchData();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setOpenConfirm(false);
   };
 
  //backend connection
-//   const [data, setData] = useState([]);
-//   const getdata =() =>{
-//     const token = window.localStorage.getItem('token');
-//     axios.get(`${backendUrl}/admin/viewpharmacyrequests`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results =  res.data.result;
-//         setData(results);
-//       })    
-//   }
-//   React.useEffect(()=>{
-//     getdata();
-//   },[]);
+ const [data, setData] = useState([]);
+ const fetchData = () => {
+  const user = JSON.parse(window.localStorage.getItem('user'));
+  const userId = user.userId;
+   axios.post(`${backendUrl}/users/lendrequests/exclude`, { userId: userId })
+     .then(res => {
+       setData(res.data); // Set the received data
+     })
+     .catch(err => {
+       console.error("Error fetching data:", err);
+     });
+ };
+  React.useEffect(()=>{
+    fetchData();
+  },[]);
 
   const columns = [
-    { id: 'name', label: 'Name'},
-    { id: 'email', label: 'Email'},
-    { id: 'contactnumber', label: 'ContactNo'},
-    { id: 'location', label: 'Location'},
-    { id: 'document', label: 'Documents'},
-    { id: 'activate', label: 'Activate'},
-    { id: 'reject', label: 'Reject'},];
-//   const rows = data; 
-  const rows = ['ddd','dsdsds']; 
+    { id: 'amount', label: 'Amount'},
+    { id: 'interestRate', label: 'Interest Rate'},
+    { id: 'repaymentPeriod', label: 'Repayment Period'},
+    { id: 'createdAt', label: 'Date'},
+    { id: 'accept', label: 'Accept'},];
+  const rows = data; 
+  // const rows = ['ddd','dsdsds']; 
 
 
   return (
@@ -174,27 +146,24 @@ export default function LendRequests() {
                           }
                         }).map((row,id) => {
                           return(
-                          <TableRow key={id}>
+                            <TableRow key={id}>
                             <TableCell align="left">
-                              {row.name}
+                              {row.amount}
                             </TableCell>
-                            <TableCell align="left">
-                              {row.email}
+                            <TableCell align="center">
+                              {row.interestRate}
                             </TableCell>
-                            <TableCell align="left">
-                              {row.contactnumber}
+                            <TableCell align="center">
+                              {row.repaymentPeriod}
                             </TableCell>
-                            <TableCell align="left">
-                              {row.city}
+                            <TableCell align="center">
+                              {row.createdAt}
                             </TableCell>
-                            <TableCell align="left">
+                            {/* <TableCell align="left">
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
-                            </TableCell>
-                            <TableCell>
-                           {/* <Button size='sm' color="primary" onClick={()=>acceptPharmacy(row.pharmacyid)}>Accept</Button> */}
-                            </TableCell>
-                            <TableCell align="left">
-                            <Button size='sm' color="danger" onClick={()=>handleClickOpenReject(row.pharmacyid)}>Reject</Button>
+                            </TableCell> */}
+                            <TableCell align="center">
+                            <Button size="small" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Accept</Button> 
                             </TableCell>
                           </TableRow>
                           );
@@ -209,51 +178,24 @@ export default function LendRequests() {
       </GridItem>
             
       {/* view documents dialogbox */}
-      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-          Documents
-        </DialogTitle>
-        <DialogContent dividers>
-          {/* <PhotoSteps doc1={doc1} doc2={doc2} doc3={doc3}/> */}
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose} color="primary">
-            Okay
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* reject button dialogbox */}
-      <Dialog open={openReject} onClose={handleCloseReject} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Reason to Reject the Request</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {"Reasons To reject the Request"}<br></br>
-
-            {"1. Documents are not clear. Please re-register with necessary documents"}<br></br>
-            {"2. Documents not Valid"}<br></br>
-            {"3. Pharmacy Licence is overdue."}<br></br>
-            {"4. Business Rejistration is overdue."}<br></br>
-
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            // onChange={(e) => setRejectreason(e.target.value)}
-            label="State the reason"
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseReject} color="primary">
-            Cancel
-          </Button>
-          {/* <Button onClick={()=>rejectPharmacy()} color="primary">
-            Send
-          </Button> */}
-        </DialogActions>
-      </Dialog>
+      <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
+      <DialogTitle id="confirm-dialog-title">
+        Confirm Action
+      </DialogTitle>
+      <DialogContent dividers>
+        {/* <Typography gutterBottom> */}
+          Are you sure you want to accept it?
+        {/* </Typography> */}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseConfirm} color="primary">
+          No
+        </Button>
+        <Button onClick={handleConfirm} color="primary">
+          Yes
+        </Button>
+      </DialogActions>
+    </Dialog>
     </GridContainer>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import classNames from "classnames";
-import { useNavigate } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { backendUrl } from "../../../UrlConfig.js";
 
@@ -27,11 +27,10 @@ import styles from "../Styles/HeaderLinkStyle.js";
 const useStyles = makeStyles(styles);
 
 export default function CustomerNavbarLinks() {
-  let navigate = useNavigate();
+  let history = useHistory();
   const classes = useStyles();
   const [openNotification, setOpenNotification] = React.useState(null);
   const [openProfile, setOpenProfile] = React.useState(null);
-
   const handleClickNotification = (event) => {
     if (openNotification && openNotification.contains(event.target)) {
       setOpenNotification(null);
@@ -39,11 +38,9 @@ export default function CustomerNavbarLinks() {
       setOpenNotification(event.currentTarget);
     }
   };
-
   const handleCloseNotification = () => {
     setOpenNotification(null);
   };
-
   const handleClickProfile = (event) => {
     if (openProfile && openProfile.contains(event.target)) {
       setOpenProfile(null);
@@ -51,21 +48,26 @@ export default function CustomerNavbarLinks() {
       setOpenProfile(event.currentTarget);
     }
   };
-
   const handleCloseProfile = () => {
     setOpenProfile(null);
   };
 
-  const dispatch = useDispatch();
-
-  const logout = async () => {
-    const res = await axios.post(`${backendUrl}/admin/signout`);
-    if (res.status === 200) {
+  const logout = async ()=>{
+    console.log("gggggggllll");
+    // localStorage.clear();
+    const res = await axios.post(`${backendUrl}/signout`);
+    if(res.status === 200){
       localStorage.clear();
-      navigate("/");
-    }
-  };
+      history.push("/");
 
+      // return <Redirect to={'/'} />
+      // <Redirect to={'/'} />
+    }
+
+    // dispatch(signout);
+    // signout);
+  
+  };
   return (
     <div>
       <Link href="/user" color="inherit">

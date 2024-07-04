@@ -1,10 +1,21 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 
-const PrivateRoute = () => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'; // Check if user is authenticated
-
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+const PrivateRoute = ({ component: Component, ...rest }) => {
+  return (
+    <Route 
+      {...rest} 
+      render={props => {
+        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        return isAuthenticated ? (
+          <Component {...props} />
+        ) : (
+          <Redirect to="/login" />
+        );
+      }} 
+    />
+  );
 };
 
 export default PrivateRoute;
