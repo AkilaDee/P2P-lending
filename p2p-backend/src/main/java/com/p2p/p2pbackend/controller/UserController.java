@@ -93,8 +93,9 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{userId}/lendrequests")
-    public ResponseEntity<LendRequestDto> submitLendRequest(@PathVariable int userId, @RequestBody LendRequestDto lendRequestDto) {
+    @PostMapping("/lendrequests/submit")
+    public ResponseEntity<LendRequestDto> submitLendRequest(@RequestBody LendRequestDto lendRequestDto) {
+        int userId = lendRequestDto.getUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         LendRequest lendRequest = LendRequestMapper.mapToLendRequest(lendRequestDto, user, null);
         lendRequest.setStatus("PENDING");
@@ -126,6 +127,38 @@ public class UserController {
         return ResponseEntity.ok(updatedLendRequest);
     }
 
+    @PostMapping("/lendrequests/pending")
+    public ResponseEntity<List<LendRequestDto>> getAllpendingLendRequestsForUser(@RequestBody UserIdRequest userIdRequest) {
+        int userId = userIdRequest.getUserId();
+        List<LendRequest> lendRequests = lendRequestRepository.findByUser_UserIdAndStatus(userId, "PENDING");
+
+        List<LendRequestDto> lendRequestDtos = lendRequests.stream()
+                .map(LendRequestMapper::mapToLendRequestDto)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(lendRequestDtos, HttpStatus.OK);
+    }
+
+    @PostMapping("/lendrequests/delete")
+    public ResponseEntity<Void> deleteLendRequest(@RequestBody Map<String, Integer> requestMap) {
+        int lendRequestId = requestMap.get("lendRequestId");
+
+        LendRequest lendRequest = lendRequestRepository.findById(lendRequestId)
+                .orElseThrow(() -> new RuntimeException("Lend Request not found"));
+
+        if (!"PENDING".equals(lendRequest.getStatus())) {
+            throw new RuntimeException("Only pending requests can be deleted");
+        }
+
+        lendRequestRepository.deleteById(lendRequestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+
+
+
+
 
     // LoanRequest endpoints
     @PostMapping("/loanrequests/exclude")
@@ -140,20 +173,10 @@ public class UserController {
         return new ResponseEntity<>(loanRequestDtos, HttpStatus.OK);
     }
 
-//    public static class UserIdRequest {
-//        private int userId;
-//
-//        public int getUserId() {
-//            return userId;
-//        }
-//
-//        public void setUserId(int userId) {
-//            this.userId = userId;
-//        }
-//    }
 
-    @PostMapping("/{userId}/loanrequests")
-    public ResponseEntity<LoanRequestDto> submitLoanRequest(@PathVariable int userId, @RequestBody LoanRequestDto loanRequestDto) {
+    @PostMapping("/loanrequests/submit")
+    public ResponseEntity<LoanRequestDto> submitLoanRequest(@RequestBody LoanRequestDto loanRequestDto) {
+        int userId = loanRequestDto.getUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         LoanRequest loanRequest = LoanRequestMapper.mapToLoanRequest(loanRequestDto, user, null);
         loanRequest.setStatus("PENDING");
@@ -192,4 +215,40 @@ public class UserController {
 
         return ResponseEntity.ok(updatedLoanRequest);
     }
+
+    @PostMapping("/loanrequests/pending")
+    public ResponseEntity<List<LoanRequestDto>> getAllPendingLoanRequestsForUser(@RequestBody UserIdRequest userIdRequest) {
+        int userId = userIdRequest.getUserId();
+        List<LoanRequest> loanRequests = loanRequestRepository.findByUser_UserIdAndStatus(userId, "PENDING");
+
+        List<LoanRequestDto> loanRequestDtos = loanRequests.stream()
+                .map(LoanRequestMapper::mapToLoanRequestDto)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(loanRequestDtos, HttpStatus.OK);
+    }
+
+    @PostMapping("/loanrequests/delete")
+    public ResponseEntity<Void> deleteLoanRequest(@RequestBody Map<String, Integer> requestMap) {
+        Integer loanRequestId = requestMap.get("loanRequestId");
+        if (loanRequestId == null) {
+            throw new RuntimeException("loanRequestId is required");
+        }
+
+        LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
+                .orElseThrow(() -> new RuntimeException("Loan Request not found"));
+
+        if (!"PENDING".equals(loanRequest.getStatus())) {
+            throw new RuntimeException("Only pending requests can be deleted");
+        }
+
+        loanRequestRepository.deleteById(loanRequestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+
+
+
 }
+

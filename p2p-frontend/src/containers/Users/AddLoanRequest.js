@@ -1,193 +1,279 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { backendUrl } from '../../UrlConfig.js';
+import TableScrollbar from 'react-table-scrollbar';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+// @material-ui/core components
+import { makeStyles } from "@material-ui/core/styles";
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import TextField from '@material-ui/core/TextField';
+import Button from "../../components/Dashboard/Button/Button.js";
+import GridItem from "../../components/Dashboard/Grid/GridItem.js";
+import GridContainer from "../../components/Dashboard/Grid/GridContainer.js";
+import Card from "../../components/Dashboard/Card/Card.js";
+import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
+import CardBody from "../../components/Dashboard/Card/CardBody.js";
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Table from "@material-ui/core/Table";
+import TableHead from "@material-ui/core/TableHead";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableRow from "@material-ui/core/TableRow";
 
-// TODO remove, this demo shouldn't need to reset the theme.
-// const classes = useStyles();
-const defaultTheme = createTheme();
+import SearchIcon from '@material-ui/icons/Search';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
-export default function SignUp() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
+
+const useStyles = makeStyles(styles);
+
+export default function AddloanRequest() {
+  const classes = useStyles();
+  const [amount, setAmount] = useState("");
+  const [interestRate, setInterestRate] = useState("");
+  const [repaymentPeriod, setRepaymentPeriod] = useState("");
+  const [open, setOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [loanRequests, setloanRequests] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false); // State for confirmation dialog
+  const [deleteLoanRequestId, setDeleteLoanRequestId] = useState(null); // ID of loan request to be deleted
+
+  useEffect(() => {
+    fetchloanRequests();
+  }, []);
+
+  const [data, setData] = useState([]);
+  const fetchloanRequests = () => {
+    const user = JSON.parse(window.localStorage.getItem('user'));
+    const userId = user.userId;
+    axios.post(`${backendUrl}/users/loanrequests/pending`, { userId: userId })
+      .then(res => {
+        setData(res.data);
+      })
+      .catch(err => {
+        console.error("Error fetching Loan requests:", err);
+      });
   };
 
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setAmount("");
+    setInterestRate("");
+    setRepaymentPeriod("");
+    setErrors({});
+  };
+
+  const handleConfirmOpen = (loanRequestId) => {
+    setDeleteLoanRequestId(loanRequestId);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+    setDeleteLoanRequestId(null);
+  };
+
+  const handleDeleteConfirmed = () => {
+    if (deleteLoanRequestId !== null) {
+      axios.post(`${backendUrl}/users/loanrequests/delete`, {
+        loanRequestId: deleteLoanRequestId,
+      }).then(response => {
+          console.log(response);
+          fetchloanRequests();
+          handleConfirmClose();
+        })
+        .catch(error => {
+          console.error("There was an error deleting the loan request!", error);
+          handleConfirmClose();
+        });
+    }
+  };
+
+  const validate = () => {
+    let tempErrors = {};
+    tempErrors.amount = amount < 500 || amount > 50000 ? "Amount must be between 500 and 50000" : "";
+    tempErrors.interestRate = interestRate < 0 || interestRate > 25 ? "Interest rate must be between 0 and 25" : "";
+    setErrors(tempErrors);
+    return Object.values(tempErrors).every(x => x === "");
+  };
+
+  const handleSubmit = () => {
+    if (validate()) {
+      const user = JSON.parse(window.localStorage.getItem('user'));
+      const userId = user.userId;
+
+      axios.post(`${backendUrl}/users/loanrequests/submit`, {
+        userId: userId,
+        amount: amount,
+        interestRate: interestRate,
+        repaymentPeriod: repaymentPeriod
+      })
+      .then(response => {
+        console.log(response);
+        fetchloanRequests();
+        handleClose();
+      })
+      .catch(error => {
+        console.error("There was an error creating the loan request!", error);
+      });
+    }
+  };
+
+  const columns = [
+    { id: 'amount', label: 'Amount' },
+    { id: 'interestRate', label: 'Interest Rate' },
+    { id: 'repaymentPeriod', label: 'Repayment Period' },
+    { id: 'createdAt', label: 'Date' },
+    { id: 'accept', label: 'Accept' },
+  ];
+  const rows = data;
+
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign up
-          </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                />
-              </Grid>
-              <Grid item xs={12} sm={5} md={5}>
-                <Typography variant="body2" display="block" align='left'>
-                  Credit Score *
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={7} md={7}>
-                <input
-                  accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
-                  type="file"
-                />
-              </Grid>
-              <Grid item xs={12} sm={5} md={5}>
-                <Typography variant="body2" display="block" align='left'>
-                  Financial Information *
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={7} md={7}>
-                <input
-                  accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
-                  type="file"
-                />
-              </Grid>
-              <Grid item xs={12} sm={5} md={5}>
-                <Typography variant="body2" display="block" align='left'>
-                  Proof of Identification *
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={7} md={7}>
-                <input
-                  accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
-                  type="file"
-                />
-              </Grid>
-              <Grid item xs={12} sm={5} md={5}>
-                <Typography variant="body2" display="block" align='left'>
-                  Proof of Address *
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={7} md={7}>
-                <input
-                  accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
-                  type="file"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive inspiration, marketing promotions and updates via email."
-                />
-              </Grid>
-            </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Submit Loan Request
+    <GridContainer>
+      <GridItem xs={12} sm={12} md={6}>
+        <Card>
+          <CardHeader color="primary">
+            <h4 className={classes.cardTitleWhite}>Add Loan Request</h4>
+          </CardHeader>
+          <CardBody>
+            <Button color="primary" onClick={handleOpen}>
+              Add New Loan Request
             </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="#" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
-        </Box>
-        <Copyright sx={{ mt: 5 }} />
-      </Container>
-    </ThemeProvider>
+          </CardBody>
+        </Card>
+      </GridItem>
+      <GridItem xs={12} sm={12} md={12}>
+        <Card>
+          <CardHeader color="primary">
+            <h4 className={classes.cardTitleWhite}>Pending Loan Requests</h4>
+          </CardHeader>
+          <CardBody>
+            <div>
+              <FormControl fullWidth variant="outlined" size="small">
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  placeholder="Search..."
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </FormControl>
+            </div>
+            <TableScrollbar rows={10}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {columns.map((column) => (
+                      <TableCell style={{ color: 'primary', backgroundColor: "white" }}
+                        key={column.id}
+                      >
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.filter((row) => {
+                    if (searchTerm === "") {
+                      return row;
+                    } else if (row.name.toLowerCase().includes(searchTerm.toLowerCase()) || row.email.toLowerCase().includes(searchTerm.toLowerCase())) {
+                      return row;
+                    }
+                  }).map((row, id) => (
+                    <TableRow key={id}>
+                      <TableCell align="left">{row.amount}</TableCell>
+                      <TableCell align="center">{row.interestRate}</TableCell>
+                      <TableCell align="center">{row.repaymentPeriod}</TableCell>
+                      <TableCell align="center">{row.createdAt}</TableCell>
+                      <TableCell align="center">
+                        <Button size="small" color="danger" onClick={() => handleConfirmOpen(row.loanRequestId)}>Delete</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableScrollbar>
+          </CardBody>
+        </Card>
+      </GridItem>
+
+      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Add New Loan Request</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="amount"
+            label="Amount"
+            type="number"
+            fullWidth
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            inputProps={{ min: 500, max: 50000 }}
+            error={Boolean(errors.amount)}
+            helperText={errors.amount}
+          />
+          <TextField
+            margin="dense"
+            id="interestRate"
+            label="Interest Rate (%)"
+            type="number"
+            step="0.5"
+            fullWidth
+            value={interestRate}
+            onChange={(e) => setInterestRate(e.target.value)}
+            inputProps={{ min: 0, max: 25, step: 0.5 }}
+            error={Boolean(errors.interestRate)}
+            helperText={errors.interestRate}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="repayment-period-label">Repayment Period (months)</InputLabel>
+            <Select
+              labelId="repayment-period-label"
+              id="repaymentPeriod"
+              value={repaymentPeriod}
+              onChange={(e) => setRepaymentPeriod(e.target.value)}
+            >
+              {Array.from({ length: 22 }, (_, i) => i + 3).map(month => (
+                <MenuItem key={month} value={month}>{month}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">Cancel</Button>
+          <Button onClick={handleSubmit} color="primary">Submit</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmOpen} onClose={handleConfirmClose}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this loan request?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmClose} color="primary">Cancel</Button>
+          <Button onClick={handleDeleteConfirmed} color="primary">OK</Button>
+        </DialogActions>
+      </Dialog>
+    </GridContainer>
   );
 }
