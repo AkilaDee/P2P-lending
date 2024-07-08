@@ -4,6 +4,9 @@ import LendRequests from "../LendRequests.js";
 import LoanRequests from "../LoanRequests.js";
 import AddLendRequest from "../AddLendRequest.js";
 import AddLoanRequest from "../AddLoanRequest.js";
+import YourAcceptedLendRequests from "../YourAcceptedLendRequests.js";
+import YourAcceptedLoanRequests from "../YourAcceptedLoanRequests.js";
+
 
 const UserRoutes = [
   {
@@ -38,6 +41,20 @@ const UserRoutes = [
     component: AddLoanRequest,
     path: "/addloanrequest",
     name: "Add Loan Request",
+    icon: Dashboard, // You can use a different icon here if needed
+    layout: "/user",
+  },
+  {
+    component: YourAcceptedLendRequests,
+    path: "/YourAcceptedLendRequests",
+    name: "Your Accepted LendRequests",
+    icon: Dashboard, // You can use a different icon here if needed
+    layout: "/user",
+  },
+  {
+    component: YourAcceptedLoanRequests,
+    path: "/YourAcceptedLoanRequests",
+    name: "Your Accepted LoanRequests",
     icon: Dashboard, // You can use a different icon here if needed
     layout: "/user",
   },
