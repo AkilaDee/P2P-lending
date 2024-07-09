@@ -261,7 +261,7 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         loanRequest.setAcceptedBy(acceptor);
-        loanRequest.setStatus("Accepted");
+        loanRequest.setStatus("APPROVED");
         loanRequest.setUpdatedAt(LocalDateTime.now());
 
         loanRequest = loanRequestRepository.save(loanRequest);

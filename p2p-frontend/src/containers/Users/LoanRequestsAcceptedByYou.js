@@ -32,32 +32,32 @@ import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
 
 const useStyles = makeStyles(styles);
 
-export default function LendRequests() {
+export default function LoanRequests() {
   const classes = useStyles();
   const [searchTerm, setSearchTerm] = useState(""); //for search function
 
   const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [selectedLendRequestId, setSelectedLendRequestId] = useState(null);
+  const [selectedLoanRequestId, setSelectedLoanRequestId] = useState(null);
 
   // Function to open the confirm dialog
-  const handleClickOpenConfirm = (lendRequestId) => {
+  const handleClickOpenConfirm = (LoanRequestId) => {
     // const userId = window.localStorage.getItem('userId');
     
-    setSelectedLendRequestId(lendRequestId);
+    setSelectedLoanRequestId(LoanRequestId);
     setOpenConfirm(true);
   };
 
   // Function to close the confirm dialog
   const handleCloseConfirm = () => {
     setOpenConfirm(false);
-    setSelectedLendRequestId(null);
+    setSelectedLoanRequestId(null);
   };
 
   // Function to handle the confirm action
   const handleConfirm = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
    const userId = user.userId;
-    axios.post(`${backendUrl}/users/lendrequests/accept`, { lendRequestId: selectedLendRequestId, acceptorId: userId })
+    axios.post(`${backendUrl}/users/Loanrequests/accept`, { LoanRequestId: selectedLoanRequestId, acceptorId: userId })
       .then((response) => {
         console.log(response);
         fetchData();
@@ -73,7 +73,7 @@ export default function LendRequests() {
  const fetchData = () => {
   const user = JSON.parse(window.localStorage.getItem('user'));
   const userId = user.userId;
-   axios.post(`${backendUrl}/users/lendrequests/exclude`, { userId: userId })
+   axios.post(`${backendUrl}/users/loanrequests/acceptedbyyou`, { userId: userId })
      .then(res => {
        setData(res.data); // Set the received data
      })
@@ -90,7 +90,7 @@ export default function LendRequests() {
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
     { id: 'createdAt', label: 'Date'},
-    { id: 'accept', label: 'Accept'},];
+    { id: 'Requestedby', label: 'Requested By'},];
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
 
@@ -101,7 +101,7 @@ export default function LendRequests() {
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Lend Requests  </h4>
+            <h4 className={classes.cardTitleWhite}>Loan Requests Accepted By You</h4>
           </CardHeader>
           <CardBody>
             <div>
@@ -163,7 +163,7 @@ export default function LendRequests() {
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
                             </TableCell> */}
                             <TableCell align="center">
-                            <Button size="small" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Accept</Button> 
+                              {row.userFirstName}
                             </TableCell>
                           </TableRow>
                           );

@@ -101,7 +101,7 @@ export default function LoanRequests() {
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Loan Requests  </h4>
+            <h4 className={classes.cardTitleWhite}>Your Accepted Loan Requests</h4>
           </CardHeader>
           <CardBody>
             <div>

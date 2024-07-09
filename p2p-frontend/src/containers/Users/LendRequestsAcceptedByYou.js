@@ -73,7 +73,7 @@ export default function LendRequests() {
  const fetchData = () => {
   const user = JSON.parse(window.localStorage.getItem('user'));
   const userId = user.userId;
-   axios.post(`${backendUrl}/users/lendrequests/exclude`, { userId: userId })
+   axios.post(`${backendUrl}/users/lendrequests/acceptedbyyou`, { userId: userId })
      .then(res => {
        setData(res.data); // Set the received data
      })
@@ -90,7 +90,7 @@ export default function LendRequests() {
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
     { id: 'createdAt', label: 'Date'},
-    { id: 'accept', label: 'Accept'},];
+    { id: 'Requestedby', label: 'Requested By'},];
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
 
@@ -101,7 +101,7 @@ export default function LendRequests() {
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Lend Requests  </h4>
+            <h4 className={classes.cardTitleWhite}>Lend Requests Accepted By You</h4>
           </CardHeader>
           <CardBody>
             <div>
@@ -163,7 +163,7 @@ export default function LendRequests() {
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
                             </TableCell> */}
                             <TableCell align="center">
-                            <Button size="small" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Accept</Button> 
+                              {row.userFirstName}
                             </TableCell>
                           </TableRow>
                           );
