@@ -40,7 +40,6 @@ export default function UserRequests() {
   const handleClickOpenReject = (userId, email) => {
     setOpenReject(true);
     setUserId(userId);
-    setEmail(email);
   };
   const handleCloseReject = () => {
     setOpenReject(false);
@@ -48,31 +47,7 @@ export default function UserRequests() {
   
   // Backend connection for reject user
   const [userId, setUserId] = useState();
-  const [rejectReason, setRejectReason] = useState();
-  const [email, setEmail] = useState();
-  const rejectUser = () => {
-    axios.post(`${backendUrl}/admin/users/delete`, { userId, rejectReason, email })
-      .then((response) => {
-        console.log(response);
-        getData();
-        handleCloseReject();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-  
-  // Backend connection for accept user
-  const acceptUser = (userId) => {
-    axios.post(`${backendUrl}/admin/users/accept`, { userId })
-      .then((response) => {
-        console.log(response);
-        getData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+
 
   const [open, setOpen] = useState(false);
   const [doc1, setDoc1] = useState('');
@@ -92,7 +67,7 @@ export default function UserRequests() {
   // Backend connection
   const [data, setData] = useState([]);
   const getData = () => {
-    axios.get(`${backendUrl}/admin/users/inactive`)
+    axios.get(`${backendUrl}/admin/users/active`)
       .then(res => {
         const results = res.data;
         setData(results); // Ensure data is an array
@@ -112,9 +87,7 @@ export default function UserRequests() {
     { id: 'firstName', label: 'First Name' },
     { id: 'lastName', label: 'Last Name' },
     { id: 'email', label: 'Email' },
-    { id: 'document', label: 'Documents' },
-    { id: 'activate', label: 'Activate' },
-    { id: 'reject', label: 'Reject' },
+    { id: 'document', label: 'Documents' }
   ];
   
   const rows = data || []; // Fallback to empty array if data is undefined
@@ -183,12 +156,6 @@ export default function UserRequests() {
                       <TableCell align="left">
                         <Button size='sm' color="primary" onClick={() => handleClickOpen(row.document1, row.document2, row.document3)}>View</Button>
                       </TableCell>
-                      <TableCell>
-                        <Button size='sm' color="primary" onClick={() => acceptUser(row.userId)}>Accept</Button>
-                      </TableCell>
-                      <TableCell align="left">
-                        <Button size='sm' color="danger" onClick={() => handleClickOpenReject(row.userId)}>Reject</Button>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -198,50 +165,8 @@ export default function UserRequests() {
         </Card>
       </GridItem>
       
-      {/* View documents dialog box */}
-      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
-        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-          Documents
-        </DialogTitle>
-        <DialogContent dividers>
-          <PhotoSteps doc1={doc1} doc2={doc2} doc3={doc3} />
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose} color="primary">
-            Okay
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Reject button dialog box */}
-      <Dialog open={openReject} onClose={handleCloseReject} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Reason to Reject the Request</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {"Reasons to reject the request"}<br></br>
-            {"1. Documents are not clear. Please re-register with necessary documents"}<br></br>
-            {"2. Documents are not valid"}<br></br>
-            {"3. Documents are overdue."}<br></br>
-            {"4. Wrong information provided."}<br></br>
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            onChange={(e) => setRejectReason(e.target.value)}
-            label="State the reason"
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseReject} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={rejectUser} color="primary">
-            Send
-          </Button>
-        </DialogActions>
-      </Dialog>
+     
+      
     </GridContainer>
   );
 }

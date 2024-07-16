@@ -35,4 +35,11 @@ public class User {
     private String financialInfo;
     @Column(name = "credit_score")
     private String creditScore;
+    @Column(name = "active_status")
+    private boolean activeStatus;
+
+    public boolean getActiveStatus() {
+
+        return activeStatus;
+    }
 }

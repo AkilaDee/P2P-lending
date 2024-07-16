@@ -1,5 +1,4 @@
 package com.p2p.p2pbackend.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,4 +18,9 @@ public class UserDto {
     private String proofOfAddress;
     private String financialInfo;
     private String creditScore;
+    private boolean activeStatus;
+
+    public boolean getActiveStatus() {
+        return activeStatus;
+    }
 }

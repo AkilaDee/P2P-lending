@@ -5,6 +5,7 @@ import MainLandingPage from './containers/Users/MainLandingPage';
 import SignUp from './containers/Users/Signup';
 import PrivateRoute from './components/HOC/PrivateRoute';
 import User from './containers/Users/Layout/User';
+import Admin from './containers/Admin/Layout/Admin';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" component={Signin} />
           <Route path="/register" component={SignUp} />
           <PrivateRoute path="/user" component={User} />
+          <PrivateRoute path="/admin" component={Admin} />
         </Switch>
       </Router>
     </div>

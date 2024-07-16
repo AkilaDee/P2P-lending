@@ -2,7 +2,9 @@ package com.p2p.p2pbackend.mapper;
 
 import com.p2p.p2pbackend.dto.UserDto;
 import com.p2p.p2pbackend.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
 
     public static UserDto mapToUserDto(User user) {
@@ -15,7 +17,8 @@ public class UserMapper {
                 user.getProofOfId(),
                 user.getProofOfAddress(),
                 user.getFinancialInfo(),
-                user.getCreditScore()
+                user.getCreditScore(),
+                user.getActiveStatus()
         );
     }
 
@@ -29,7 +32,8 @@ public class UserMapper {
                 userDto.getProofOfId(),
                 userDto.getProofOfAddress(),
                 userDto.getFinancialInfo(),
-                userDto.getCreditScore()
+                userDto.getCreditScore(),
+                userDto.getActiveStatus()
         );
 
     }
