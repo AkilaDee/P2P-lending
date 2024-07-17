@@ -15,6 +15,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.HashMap;
 
 @AllArgsConstructor
 @RestController
@@ -26,18 +27,25 @@ public class UserController {
     private final LendRequestRepository lendRequestRepository;
     private final LoanRequestRepository loanRequestRepository;
 
-    @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
+
+    @PostMapping("/signup")
+    public ResponseEntity<String> createUser(@RequestBody UserDto userDto) {
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("An account with this email already exists");
+        }
+
         User user = UserMapper.mapToUser(userDto);
 
         // Encrypt the password using BCryptPasswordEncoder
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        user = userRepository.save(user);
-        UserDto savedUser = UserMapper.mapToUserDto(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body("User created successfully");
     }
+
 
     @GetMapping("{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("userId") int userId) {
@@ -55,7 +63,7 @@ public class UserController {
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @PostMapping("/signin")
-    public ResponseEntity<UserDto> signIn(@RequestBody SignInDto signInDto) {
+    public ResponseEntity<Map<String, Object>> signIn(@RequestBody SignInDto signInDto) {
         User user = userRepository.findByEmail(signInDto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -64,9 +72,18 @@ public class UserController {
         }
 
         UserDto userDto = UserMapper.mapToUserDto(user);
-        return ResponseEntity.ok(userDto);
-    }
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", userDto);
 
+        // Set role based on email
+        String role = "user";
+        if ("admin@peerfund.com".equals(user.getEmail())) {
+            role = "admin";
+        }
+        response.put("role", role);
+
+        return ResponseEntity.ok(response);
+    }
     // LendRequest endpoints
 
     @PostMapping("/lendrequests/exclude")

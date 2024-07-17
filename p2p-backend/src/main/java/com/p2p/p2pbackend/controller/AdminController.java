@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.p2p.p2pbackend.service.EmailService;
 
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,26 @@ public class AdminController {
 
         UserDto userDto = userMapper.mapToUserDto(savedUser);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
+
+    private final EmailService emailService;
+
+    @PostMapping("users/delete")
+    public ResponseEntity<UserDto> deleteUser(@RequestBody Map<String, String> requestMap){
+        int userId = Integer.parseInt(requestMap.get("userId"));
+        String rejectReason = requestMap.get("rejectReason");
+        String email = requestMap.get("email");
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userRepository.deleteById(userId);
+
+        String subject = "Account Rejection Notification";
+        String body = "Dear user, your account has been rejected for the following reason: " + rejectReason;
+        emailService.sendSimpleEmail(email, subject, body);
+
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/users/active")

@@ -8,8 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
+    Boolean existsByEmail(String email);
     List<User> findByActiveStatusFalse();
     Optional<User> findByUserId(int userId);
     List<User> findByActiveStatusTrue();
+    Optional<User> deleteById(int userId);
 
 }
