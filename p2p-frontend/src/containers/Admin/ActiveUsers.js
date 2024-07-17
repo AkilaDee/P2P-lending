@@ -53,11 +53,15 @@ export default function UserRequests() {
   const [doc1, setDoc1] = useState('');
   const [doc2, setDoc2] = useState('');
   const [doc3, setDoc3] = useState('');
+  const [doc4, setDoc4] = useState('');
 
-  const handleClickOpen = (document1, document2, document3) => {
+
+  const handleClickOpen = (document1, document2, document3, document4) => {
     setDoc1(document1);
     setDoc2(document2);
     setDoc3(document3);
+    setDoc4(document4);
+
     setOpen(true);
   };
   const handleClose = () => {
@@ -154,7 +158,7 @@ export default function UserRequests() {
                         {row.contactnumber}
                       </TableCell> */}
                       <TableCell align="left">
-                        <Button size='sm' color="primary" onClick={() => handleClickOpen(row.document1, row.document2, row.document3)}>View</Button>
+                        <Button size='sm' color="primary" onClick={() => handleClickOpen(row.document1, row.document2, row.document3, row.document4)}>View</Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -164,7 +168,20 @@ export default function UserRequests() {
           </CardBody>
         </Card>
       </GridItem>
-      
+      {/* View documents dialog box */}
+      <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
+        <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+          Documents
+        </DialogTitle>
+        <DialogContent dividers>
+          <PhotoSteps doc1={doc1} doc2={doc2} doc3={doc3} doc4={doc4} />
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleClose} color="primary">
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
      
       
     </GridContainer>

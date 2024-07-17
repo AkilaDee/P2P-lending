@@ -1,19 +1,21 @@
-/* eslint-disable react/prop-types */
+// HOC/PrivateRoute.js
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 
-const PrivateRoute = ({ component: Component, ...rest }) => {
+const PrivateRoute = ({ component: Component, requiredRole, ...rest }) => {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const role = localStorage.getItem('role');
+
   return (
-    <Route 
-      {...rest} 
-      render={props => {
-        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-        return isAuthenticated ? (
+    <Route
+      {...rest}
+      render={props =>
+        isAuthenticated && role === requiredRole ? (
           <Component {...props} />
         ) : (
           <Redirect to="/login" />
-        );
-      }} 
+        )
+      }
     />
   );
 };

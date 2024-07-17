@@ -1,3 +1,4 @@
+// reducers/auth.reducers.js
 import { authConstants } from "../Actions/Constants";
 
 const initState = {
@@ -5,6 +6,7 @@ const initState = {
   user: {
     email: "",
   },
+  role: null, // Add role field
   authenticate: false,
   authenticating: false,
   loading: false,
@@ -13,44 +15,37 @@ const initState = {
 };
 
 export default (state = initState, action) => {
-  console.log(action);
   switch (action.type) {
     case authConstants.LOGIN_REQUEST:
-      state = {
+      return {
         ...state,
         authenticating: true,
       };
-      break;
     case authConstants.LOGIN_SUCCESS:
-      state = {
+      return {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
+        role: action.payload.role, // Update role
         authenticate: true,
         authenticating: false,
       };
-      break;
     case authConstants.LOGOUT_REQUEST:
-      state = {
-        ...initState,  // Corrected from ...initstate
+      return {
+        ...initState,
         loading: true,
       };
-      break;
     case authConstants.LOGOUT_SUCCESS:
-      state = {
-        ...initState,  // Corrected from ...initstate
+      return {
+        ...initState,
       };
-      break;
     case authConstants.LOGOUT_FAILURE:
-      state = {
+      return {
         ...state,
         error: action.payload.error,
         loading: false,
       };
-      break;
     default:
-      break;
+      return state;
   }
-
-  return state;
 };

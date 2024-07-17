@@ -1,5 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import { Redirect } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, isuserLoggedIn } from '../../Actions/Auth.ActionsUser.js';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,9 +16,6 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useDispatch, useSelector } from 'react-redux';
-import { Redirect } from 'react-router-dom';
-import { isuserLoggedIn, login } from '../../Actions/Auth.ActionsUser.js';
 
 function Copyright(props) {
   return (
@@ -46,16 +46,17 @@ export default function SignInCustomer() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const user = {
-      email: data.get('email'),
-      password: data.get('password'),
-    };
+    const user = { email, password };
     dispatch(login(user));
   };
 
+  // Add debug logs
+  console.log("Auth State:", auth);
+
   if (auth.authenticate) {
-    return <Redirect to={'/user/dashboard'} />
+    // Debug log for redirection
+    console.log("Redirection based on role:", auth.role);
+    return auth.role === 'admin' ? <Redirect to={'/admin/dashboard'} /> : <Redirect to={'/user/dashboard'} />;
   }
 
   return (

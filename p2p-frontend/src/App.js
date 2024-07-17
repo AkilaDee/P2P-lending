@@ -15,8 +15,8 @@ function App() {
           <Route exact path="/" component={MainLandingPage} />
           <Route path="/login" component={Signin} />
           <Route path="/register" component={SignUp} />
-          <PrivateRoute path="/user" component={User} />
-          <PrivateRoute path="/admin" component={Admin} />
+          <PrivateRoute path="/user" component={User} requiredRole="user" />
+          <PrivateRoute path="/admin" component={Admin} requiredRole="admin" />
         </Switch>
       </Router>
     </div>

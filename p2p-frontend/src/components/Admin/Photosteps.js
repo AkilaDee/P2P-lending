@@ -11,16 +11,21 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
 const tutorialSteps = [
   {
-    label: 'Medical Council Certificate',
+    label: 'Credit Score',
     imgPath: 'http://ohlums.com/certificate/18.jpg',
   },
   {
-    label: 'Pharmaciest Licence',
+    label: 'Financial Document/Bank statement',
     imgPath:
     'https://ayurveda-in-paradise.com/img-gal/cert1_new.jpg',
   },
   {
-    label: 'Business Registration Certificate',
+    label: 'Proof of Address',
+    imgPath:
+      'http://www.mirissawhalewarriors.com/images/certificats/Certificate_of__Individual_Business_Name_Registration.jpg',
+  },
+  {
+    label: 'Proof of ID',
     imgPath:
       'http://www.mirissawhalewarriors.com/images/certificats/Certificate_of__Individual_Business_Name_Registration.jpg',
   },
