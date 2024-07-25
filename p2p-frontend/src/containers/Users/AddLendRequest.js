@@ -35,6 +35,7 @@ export default function AddLendRequest() {
   const [interestRate, setInterestRate] = useState("");
   const [repaymentPeriod, setRepaymentPeriod] = useState("");
   const [open, setOpen] = useState(false);
+  const [total, setTotal] = useState(0); 
   const [errors, setErrors] = useState({});
   const [lendRequests, setLendRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,6 +46,10 @@ export default function AddLendRequest() {
   useEffect(() => {
     fetchLendRequests();
   }, []);
+
+  useEffect(() => {
+    calculateTotal();
+  }, [amount, interestRate, repaymentPeriod]);
 
   const fetchLendRequests = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
@@ -105,6 +110,7 @@ export default function AddLendRequest() {
 
   const handleSubmit = () => {
     if (validate()) {
+      calculateTotal();
       const user = JSON.parse(window.localStorage.getItem('user'));
       const userId = user.userId;
 
@@ -112,7 +118,8 @@ export default function AddLendRequest() {
         userId: userId,
         amount: amount,
         interestRate: interestRate,
-        repaymentPeriod: repaymentPeriod
+        repaymentPeriod: repaymentPeriod,
+        total: total
       }).then(response => {
         console.log(response);
         fetchLendRequests();
@@ -123,11 +130,17 @@ export default function AddLendRequest() {
     }
   };
 
+  const calculateTotal = () => {
+    const totalValue = (amount * (interestRate / 100) * (repaymentPeriod / 12)) + parseFloat(amount);
+    setTotal(totalValue);
+  };
+
   const columns = [
+    { id: 'createdAt', label: 'Date' },
     { id: 'amount', label: 'Amount' },
     { id: 'interestRate', label: 'Interest Rate' },
     { id: 'repaymentPeriod', label: 'Repayment Period' },
-    { id: 'createdAt', label: 'Date' },
+    { id: 'total', label: 'Total' },
     { id: 'accept', label: 'Accept' },
   ];
   
@@ -190,11 +203,12 @@ export default function AddLendRequest() {
                     }
                   }).map((row, id) => (
                     <TableRow key={id}>
-                      <TableCell align="left">{row.amount}</TableCell>
+                      <TableCell align="left">{row.createdAt}</TableCell>
+                      <TableCell align="center">{row.amount}</TableCell>
                       <TableCell align="center">{row.interestRate}</TableCell>
                       <TableCell align="center">{row.repaymentPeriod}</TableCell>
-                      <TableCell align="center">{row.createdAt}</TableCell>
-                      <TableCell align="center">
+                      <TableCell align="left">{row.total}</TableCell>
+                      <TableCell align="left">
                         <Button size="small" color="danger" onClick={() => handleConfirmOpen(row.lendRequestId)}>Delete</Button>
                       </TableCell>
                     </TableRow>
@@ -207,7 +221,7 @@ export default function AddLendRequest() {
       </GridItem>
 
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Add New Lend Request</DialogTitle>
+        <DialogTitle id="form-dialog-title">Add New Loan Request</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -248,14 +262,21 @@ export default function AddLendRequest() {
               ))}
             </Select>
           </FormControl>
+          <TextField
+            margin="dense"
+            id="total"
+            label="Total"
+            type="number"
+            fullWidth
+            value={total}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary">
-            Submit
-          </Button>
+          <Button onClick={handleClose} color="primary">Cancel</Button>
+          <Button onClick={handleSubmit} color="primary">Submit</Button>
         </DialogActions>
       </Dialog>
 

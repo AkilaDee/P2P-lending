@@ -11,6 +11,7 @@ public class LoanRequestMapper {
                 loanRequest.getLoanRequestId(),
                 loanRequest.getUser().getUserId(),
                 loanRequest.getAmount(),
+                loanRequest.getTotal(),
                 loanRequest.getInterestRate(),
                 loanRequest.getRepaymentPeriod(),
                 loanRequest.getStatus(),
@@ -25,6 +26,7 @@ public class LoanRequestMapper {
         loanRequest.setLoanRequestId(loanRequestDto.getLoanRequestId());
         loanRequest.setUser(user);
         loanRequest.setAmount(loanRequestDto.getAmount());
+        loanRequest.setTotal(loanRequestDto.getTotal());
         loanRequest.setInterestRate(loanRequestDto.getInterestRate());
         loanRequest.setRepaymentPeriod(loanRequestDto.getRepaymentPeriod());
         loanRequest.setStatus(loanRequestDto.getStatus());

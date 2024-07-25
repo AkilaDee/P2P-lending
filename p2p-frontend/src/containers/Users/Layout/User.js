@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { Route, Redirect, Switch } from 'react-router-dom';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,6 +9,7 @@ import Sidebar from '../../../components/Dashboard/Sidebar/Sidebar';
 import routes from '../Routes/UserRoutes';
 import styles from '../../../components/Dashboard/Styles/AdminStyle';
 import bgImage from '../../../components/Dashboard/Images/two.jpg';
+// import logo from '../../../components/Dashboard/Images/one.jpg';
 import logo from '../../../components/Dashboard/Images/one.jpg';
 
 const useStyles = makeStyles(styles);
@@ -33,7 +34,7 @@ const switchRoutes = (
 
 export default function User({ ...rest }) {
   const classes = useStyles();
-  const mainPanel = React.createRef();
+  const mainPanel = useRef(null);
   const [image, setImage] = useState(bgImage);
   const [color, setColor] = useState('blue');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -56,11 +57,14 @@ export default function User({ ...rest }) {
     };
   }, []);
 
+  //Filter out the profile route for the sidebar
+  const sidebarRoutes = routes.filter(route => route.path !== '/profile');
+
   return (
     <div className={classes.wrapper}>
       <Sidebar
-        routes={routes}
-        logoText="User"
+        routes={sidebarRoutes}
+        logoText="PeerFund"
         logo={logo}
         image={image}
         handleDrawerToggle={handleDrawerToggle}
@@ -74,10 +78,6 @@ export default function User({ ...rest }) {
           <div className={classes.content}>
             <div className={classes.container}>
               {switchRoutes}
-              {/* <Switch>
-                {switchRoutes(routes)}
-                <Route path="/user" render={() => <Redirect to="/user/dashboard" />} />
-              </Switch> */}
             </div>
           </div>
         </PerfectScrollbar>

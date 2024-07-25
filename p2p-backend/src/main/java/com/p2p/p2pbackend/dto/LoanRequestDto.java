@@ -16,12 +16,14 @@ public class LoanRequestDto {
     private int loanRequestId;
     private int userId;
     private Double amount;
+    private Double total;
     private Double interestRate;
     private Integer repaymentPeriod;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer acceptedBy;
+
 }
 
 

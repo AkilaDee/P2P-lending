@@ -22,13 +22,13 @@ export const login = (user) => {
       const res = await axios.post(`${backendUrl}/users/signin`, user);
 
       if (res.status === 200) {
-        const { token, userdet, role } = res.data;
-        localStorage.setItem('user', JSON.stringify(userdet));
+        const { token, user, role } = res.data;
+        localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('role', role); // Store the role
         localStorage.setItem('isAuthenticated', 'true');
         dispatch({
           type: authConstants.LOGIN_SUCCESS,
-          payload: { token, userdet, role },
+          payload: { token, user, role },
         });
       } else {
         notify("Signin Error!");

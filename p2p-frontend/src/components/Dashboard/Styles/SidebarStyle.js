@@ -77,7 +77,7 @@ import {
       },
       logoLink: {
         ...defaultFont,
-        textTransform: 'uppercase',
+        // textTransform: 'uppercase',
         padding: '5px 0',
         display: 'block',
         fontSize: '18px',

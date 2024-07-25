@@ -86,10 +86,11 @@ export default function LendRequests() {
   },[]);
 
   const columns = [
+    { id: 'createdAt', label: 'Date'},
     { id: 'amount', label: 'Amount'},
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
-    { id: 'createdAt', label: 'Date'},
+    { id: 'total', label: 'Total'},
     { id: 'acceptedByFirstName', label: 'Accepted By'},];
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
@@ -148,6 +149,9 @@ export default function LendRequests() {
                           return(
                             <TableRow key={id}>
                             <TableCell align="left">
+                              {row.createdAt}
+                            </TableCell>
+                            <TableCell align="left">
                               {row.amount}
                             </TableCell>
                             <TableCell align="center">
@@ -157,13 +161,13 @@ export default function LendRequests() {
                               {row.repaymentPeriod}
                             </TableCell>
                             <TableCell align="center">
-                              {row.createdAt}
+                              {row.total}
                             </TableCell>
                             {/* <TableCell align="left">
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
                             </TableCell> */}
-                            <TableCell align="center">
-                            {row.acceptedByFirstName}
+                            <TableCell align="left">
+                            {row.acceptedByFirstName +" "+ row.acceptedByLastName}
                             </TableCell>
                           </TableRow>
                           );

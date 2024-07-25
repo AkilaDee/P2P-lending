@@ -8,6 +8,7 @@ import YourAcceptedLendRequests from "../YourAcceptedLendRequests.js";
 import YourAcceptedLoanRequests from "../YourAcceptedLoanRequests.js";
 import AcceptedLendRequestsByYou from "../LendRequestsAcceptedByYou.js"
 import AcceptedLoanRequestsByYou from "../LoanRequestsAcceptedByYou.js"
+import Profile from "../Profile.js";
 
 
 
@@ -72,6 +73,13 @@ const UserRoutes = [
     component: AcceptedLoanRequestsByYou,
     path: "/AcceptedLoanRequestsByYou",
     name: "Accepted Loan Requests",
+    icon: Dashboard, // You can use a different icon here if needed
+    layout: "/user",
+  },
+  {
+    component: Profile,
+    path: "/profile",
+    name: "Profile",
     icon: Dashboard, // You can use a different icon here if needed
     layout: "/user",
   },

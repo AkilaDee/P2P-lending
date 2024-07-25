@@ -84,6 +84,17 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/profile")
+    public ResponseEntity<UserDto> getUserProfile(@RequestBody UserIdRequest userIdRequest) {
+        int userId = userIdRequest.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserDto userDto = UserMapper.mapToUserDto(user);
+        userDto.setPassword(null); // Exclude password
+        return ResponseEntity.ok(userDto);
+    }
+
     // LendRequest endpoints
 
     @PostMapping("/lendrequests/exclude")
@@ -185,6 +196,7 @@ public class UserController {
                 public final int lendRequestId = lendRequest.getLendRequestId();
                 public final int userId = lendRequest.getUser().getUserId();
                 public final Double amount = lendRequest.getAmount();
+                public final Double total = lendRequest.getTotal();
                 public final Double interestRate = lendRequest.getInterestRate();
                 public final Integer repaymentPeriod = lendRequest.getRepaymentPeriod();
                 public final String status = lendRequest.getStatus();
@@ -213,6 +225,7 @@ public class UserController {
                 public final int lendRequestId = lendRequest.getLendRequestId();
                 public final int userId = lendRequest.getUser().getUserId();
                 public final Double amount = lendRequest.getAmount();
+                public final Double total = lendRequest.getTotal();
                 public final Double interestRate = lendRequest.getInterestRate();
                 public final Integer repaymentPeriod = lendRequest.getRepaymentPeriod();
                 public final String status = lendRequest.getStatus();
@@ -331,6 +344,7 @@ public class UserController {
                 public final int loanRequestId = loanRequest.getLoanRequestId();
                 public final int userId = loanRequest.getUser().getUserId();
                 public final Double amount = loanRequest.getAmount();
+                public final Double total = loanRequest.getTotal();
                 public final Double interestRate = loanRequest.getInterestRate();
                 public final Integer repaymentPeriod = loanRequest.getRepaymentPeriod();
                 public final String status = loanRequest.getStatus();
@@ -359,6 +373,7 @@ public class UserController {
                 public final int loanRequestId = loanRequest.getLoanRequestId();
                 public final int userId = loanRequest.getUser().getUserId();
                 public final Double amount = loanRequest.getAmount();
+                public final Double total = loanRequest.getTotal();
                 public final Double interestRate = loanRequest.getInterestRate();
                 public final Integer repaymentPeriod = loanRequest.getRepaymentPeriod();
                 public final String status = loanRequest.getStatus();

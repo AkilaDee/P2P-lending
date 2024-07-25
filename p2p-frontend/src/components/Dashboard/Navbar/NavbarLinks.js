@@ -52,22 +52,29 @@ export default function CustomerNavbarLinks() {
     setOpenProfile(null);
   };
 
-  const logout = async ()=>{
-    console.log("gggggggllll");
+  const logout = () => {
+  
+    localStorage.clear();
+    history.push("/");
+  };
+  
+
+  // const logout = async ()=>{
+  //   console.log("gggggggllll");
     // localStorage.clear();
-    const res = await axios.post(`${backendUrl}/signout`);
-    if(res.status === 200){
-      localStorage.clear();
-      history.push("/");
+    // const res = await axios.post(`${backendUrl}/signout`);
+    // if(res.status === 200){
+    //   localStorage.clear();
+    //   history.push("/");
 
       // return <Redirect to={'/'} />
       // <Redirect to={'/'} />
-    }
+    // }
 
     // dispatch(signout);
     // signout);
   
-  };
+  // };
   return (
     <div>
       <Link href="/user" color="inherit">
@@ -123,14 +130,14 @@ export default function CustomerNavbarLinks() {
               <Paper>
                 <ClickAwayListener onClickAway={handleCloseProfile}>
                   <MenuList role="menu">
-                    <Link href="/admin/user" color="inherit" underline='none'>
+                  <Link href="/user/profile" color="inherit" underline='none'>
                       <MenuItem
                         onClick={handleCloseProfile}
                         className={classes.dropdownItem}
                       >
                         Profile
                       </MenuItem>
-                    </Link>
+                    </Link>     
 
                     <Divider light />
                     <MenuItem

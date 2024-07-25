@@ -24,6 +24,7 @@ public class LoanRequest {
     private User user;
 
     private Double amount;
+    private Double total;
     private Double interestRate;
     private Integer repaymentPeriod;
     private String status;

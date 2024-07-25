@@ -89,10 +89,11 @@ export default function LendRequests() {
   //   console.log('Selected loan request ID changed:', selectedLoanRequestId);
   // }, [selectedLoanRequestId]);
   const columns = [
+    { id: 'createdAt', label: 'Date'},
     { id: 'amount', label: 'Amount'},
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
-    { id: 'createdAt', label: 'Date'},
+    { id: 'total', label: 'Total'},
     { id: 'accept', label: 'Accept'},];
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
@@ -151,6 +152,9 @@ export default function LendRequests() {
                           return(
                           <TableRow key={id}>
                             <TableCell align="left">
+                              {row.createdAt}
+                            </TableCell>
+                            <TableCell align="left">
                               {row.amount}
                             </TableCell>
                             <TableCell align="center">
@@ -160,7 +164,7 @@ export default function LendRequests() {
                               {row.repaymentPeriod}
                             </TableCell>
                             <TableCell align="center">
-                              {row.createdAt}
+                              {row.total}
                             </TableCell>
                             {/* <TableCell align="left">
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
@@ -168,7 +172,7 @@ export default function LendRequests() {
                             {/* <TableCell>
                               <Button size='sm' color="primary" onClick={()=>acceptPharmacy(row.loanRequestId)}>Accept</Button>
                             </TableCell> */}
-                            <TableCell align="center">
+                            <TableCell align="left">
                             <Button size="small" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId)}>Accept</Button> 
                             </TableCell>
                           </TableRow>

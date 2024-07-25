@@ -11,6 +11,7 @@ public class LendRequestMapper {
                 lendRequest.getLendRequestId(),
                 lendRequest.getUser().getUserId(),
                 lendRequest.getAmount(),
+                lendRequest.getTotal(),
                 lendRequest.getInterestRate(),
                 lendRequest.getRepaymentPeriod(),
                 lendRequest.getStatus(),
@@ -25,6 +26,7 @@ public class LendRequestMapper {
         lendRequest.setLendRequestId(lendRequestDto.getLendRequestId());
         lendRequest.setUser(user);
         lendRequest.setAmount(lendRequestDto.getAmount());
+        lendRequest.setTotal(lendRequestDto.getTotal());
         lendRequest.setInterestRate(lendRequestDto.getInterestRate());
         lendRequest.setRepaymentPeriod(lendRequestDto.getRepaymentPeriod());
         lendRequest.setStatus(lendRequestDto.getStatus());

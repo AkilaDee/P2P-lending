@@ -38,6 +38,7 @@ export default function AddloanRequest() {
   const [amount, setAmount] = useState("");
   const [interestRate, setInterestRate] = useState("");
   const [repaymentPeriod, setRepaymentPeriod] = useState("");
+  const [total, setTotal] = useState(0); 
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState({});
   const [loanRequests, setloanRequests] = useState([]);
@@ -48,6 +49,10 @@ export default function AddloanRequest() {
   useEffect(() => {
     fetchloanRequests();
   }, []);
+
+  useEffect(() => {
+    calculateTotal();
+  }, [amount, interestRate, repaymentPeriod]);
 
   const [data, setData] = useState([]);
   const fetchloanRequests = () => {
@@ -110,6 +115,7 @@ export default function AddloanRequest() {
 
   const handleSubmit = () => {
     if (validate()) {
+      calculateTotal();
       const user = JSON.parse(window.localStorage.getItem('user'));
       const userId = user.userId;
 
@@ -117,7 +123,8 @@ export default function AddloanRequest() {
         userId: userId,
         amount: amount,
         interestRate: interestRate,
-        repaymentPeriod: repaymentPeriod
+        repaymentPeriod: repaymentPeriod,
+        total:total
       })
       .then(response => {
         console.log(response);
@@ -130,11 +137,17 @@ export default function AddloanRequest() {
     }
   };
 
+  const calculateTotal = () => {
+    const totalValue = (amount * (interestRate / 100) * (repaymentPeriod / 12)) + parseFloat(amount);
+    setTotal(totalValue);
+  };
+
   const columns = [
+    { id: 'createdAt', label: 'Date' },
     { id: 'amount', label: 'Amount' },
     { id: 'interestRate', label: 'Interest Rate' },
     { id: 'repaymentPeriod', label: 'Repayment Period' },
-    { id: 'createdAt', label: 'Date' },
+    { id: 'total', label: 'Total' },
     { id: 'accept', label: 'Accept' },
   ];
   const rows = data;
@@ -198,11 +211,12 @@ export default function AddloanRequest() {
                     }
                   }).map((row, id) => (
                     <TableRow key={id}>
-                      <TableCell align="left">{row.amount}</TableCell>
+                      <TableCell align="left">{row.createdAt}</TableCell>
+                      <TableCell align="center">{row.amount}</TableCell>
                       <TableCell align="center">{row.interestRate}</TableCell>
                       <TableCell align="center">{row.repaymentPeriod}</TableCell>
-                      <TableCell align="center">{row.createdAt}</TableCell>
-                      <TableCell align="center">
+                      <TableCell align="center">{row.total}</TableCell>
+                      <TableCell align="left">
                         <Button size="small" color="danger" onClick={() => handleConfirmOpen(row.loanRequestId)}>Delete</Button>
                       </TableCell>
                     </TableRow>
@@ -256,6 +270,17 @@ export default function AddloanRequest() {
               ))}
             </Select>
           </FormControl>
+          <TextField
+            margin="dense"
+            id="total"
+            label="Total"
+            type="number"
+            fullWidth
+            value={total}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">Cancel</Button>
