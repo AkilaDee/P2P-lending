@@ -18,6 +18,7 @@ import Card from "../../components/Dashboard/Card/Card.js";
 import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
 import CardBody from "../../components/Dashboard/Card/CardBody.js";
 import Button from "../../components/Dashboard/Button/Button.js";
+import { Rating } from '@material-ui/lab';
 
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
 
@@ -29,7 +30,7 @@ export default function UserProfile() {
     firstName: '',
     lastName: '',
     email: '',
-    contactNumber: '',
+    rating: 0
   });
 
   const [editOpen, setEditOpen] = useState(false);
@@ -37,7 +38,6 @@ export default function UserProfile() {
     firstName: '',
     lastName: '',
     email: '',
-    contactNumber: '',
   });
 
   const getUserData = () => {
@@ -55,7 +55,9 @@ export default function UserProfile() {
         setUserData({
           firstName: '',
           lastName: '',
-          email: ''
+          email: '',
+          contactNumber: '',
+          rating: 0
         });
       });
   };
@@ -112,8 +114,15 @@ export default function UserProfile() {
                   <TableCell>{userData.email}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell component="th" scope="row">Contact Number</TableCell>
-                  <TableCell>{userData.contactNumber}</TableCell>
+                  <TableCell component="th" scope="row">Average Rating</TableCell>
+                  <TableCell>
+                    <Rating
+                      name="read-only"
+                      value={userData.rating}
+                      precision={0.5}
+                      readOnly
+                    />
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

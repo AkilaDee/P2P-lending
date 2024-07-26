@@ -18,7 +18,8 @@ public class UserMapper {
                 user.getProofOfAddress(),
                 user.getFinancialInfo(),
                 user.getCreditScore(),
-                user.getActiveStatus()
+                user.getActiveStatus(),
+                user.getRating()
         );
     }
 
@@ -33,7 +34,8 @@ public class UserMapper {
                 userDto.getProofOfAddress(),
                 userDto.getFinancialInfo(),
                 userDto.getCreditScore(),
-                userDto.getActiveStatus()
+                userDto.getActiveStatus(),
+                userDto.getRating()
         );
 
     }

@@ -19,6 +19,7 @@ public class UserDto {
     private String financialInfo;
     private String creditScore;
     private boolean activeStatus;
+    private double rating;
 
     public boolean getActiveStatus() {
         return activeStatus;

@@ -217,7 +217,7 @@ export default function AddloanRequest() {
                       <TableCell align="center">{row.repaymentPeriod}</TableCell>
                       <TableCell align="center">{row.total}</TableCell>
                       <TableCell align="left">
-                        <Button size="small" color="danger" onClick={() => handleConfirmOpen(row.loanRequestId)}>Delete</Button>
+                        <Button size="sm" color="danger" onClick={() => handleConfirmOpen(row.loanRequestId)}>Delete</Button>
                       </TableCell>
                     </TableRow>
                   ))}

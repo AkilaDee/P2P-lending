@@ -167,7 +167,7 @@ export default function LendRequests() {
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
                             </TableCell> */}
                             <TableCell align="left">
-                            <Button size="small" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Accept</Button> 
+                            <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Accept</Button> 
                             </TableCell>
                           </TableRow>
                           );

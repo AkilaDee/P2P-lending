@@ -37,6 +37,8 @@ public class User {
     private String creditScore;
     @Column(name = "active_status")
     private boolean activeStatus;
+    @Column(name = "rating")
+    private double rating;
 
     public boolean getActiveStatus() {
 
