@@ -95,6 +95,32 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
+    @PostMapping("/submitrating")
+    public ResponseEntity<UserDto> submitUserRating(@RequestBody Map<String, Object> requestMap) {
+        int userId = (int) requestMap.get("userId");
+        double submittedRating = ((Number) requestMap.get("rating")).doubleValue();
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Double currentRating = user.getRating();
+        Integer currentRatingCount = user.getRatingCount();
+
+        
+        if (currentRatingCount == null) {
+            currentRatingCount = 0;
+        }
+
+        double newRating = ((currentRating * currentRatingCount) + submittedRating) / (currentRatingCount + 1);
+        user.setRating(newRating);
+        user.setRatingCount(currentRatingCount + 1);
+
+        userRepository.save(user);
+
+        UserDto userDto = UserMapper.mapToUserDto(user);
+
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
+
     // LendRequest endpoints
 
     @PostMapping("/lendrequests/exclude")

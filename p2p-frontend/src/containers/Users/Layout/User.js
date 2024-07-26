@@ -10,7 +10,7 @@ import routes from '../Routes/UserRoutes';
 import styles from '../../../components/Dashboard/Styles/AdminStyle';
 import bgImage from '../../../components/Dashboard/Images/two.jpg';
 // import logo from '../../../components/Dashboard/Images/one.jpg';
-import logo from '../../../components/Dashboard/Images/one.jpg';
+import logo from '../../../components/Dashboard/Images/pf3.jpg';
 
 const useStyles = makeStyles(styles);
 
