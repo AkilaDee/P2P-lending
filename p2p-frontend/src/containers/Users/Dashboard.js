@@ -1,274 +1,248 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { backendUrl } from '../../UrlConfig.js';
+import TableScrollbar from 'react-table-scrollbar';
 
-/* eslint-disable react/jsx-key */
-import React,{useState} from "react";
-// import axios from 'axios';
-// import { backendUrl } from "../../urlConfig.js";
+// @material-ui/core components
+import { makeStyles } from '@material-ui/core/styles';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import FormControl from '@material-ui/core/FormControl';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import { Table, TableHead, TableBody, TableCell, TableRow } from '@material-ui/core';
 
-// @material-ui/core
-import { makeStyles } from "@material-ui/core/styles";
-// @material-ui/icons
-import Store from "@material-ui/icons/Store";
-// import DateRange from "@material-ui/icons/DateRange";
-// import Update from "@material-ui/icons/Update";
-// import Accessibility from "@material-ui/icons/Accessibility";
-// import Notifications from "@material-ui/icons/Notifications";
-// import ArrowUpward from "@material-ui/icons/ArrowUpward";
-// import AccessTime from "@material-ui/icons/AccessTime";
+import SearchIcon from '@material-ui/icons/Search';
 
-// import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 // core components
-import GridItem from "../../components/Dashboard/Grid/GridItem.js";
-import GridContainer from "../../components/Dashboard/Grid/GridContainer.js";
-import Card from "../../components/Dashboard/Card/Card.js";
-import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
-// import CardIcon from "../../components/Dashboard/Card/CardIcon.js";
-// import CardBody from "../../components/Dashboard/Card/CardBody.js";
-// import CardFooter from "../../components/Dashboard/Card/CardFooter.js";
-// import SalesChart from "../../components/admin/SalesChart.js";
-// import IncomeGrowthChart from "../../components/admin/IncomeGrowthChart.js";
-import dashboardStyle from "../../components/Dashboard/Styles/DashboardStyles.js";
+import GridItem from '../../components/Dashboard/Grid/GridItem.js';
+import GridContainer from '../../components/Dashboard/Grid/GridContainer.js';
+import Card from '../../components/Dashboard/Card/Card.js';
+import CardHeader from '../../components/Dashboard/Card/CardHeader.js';
+import CardBody from '../../components/Dashboard/Card/CardBody.js';
+import Button from '../../components/Dashboard/Button/Button.js';
 
-const useStyles = makeStyles(dashboardStyle);
+import styles from '../../components/Dashboard/Styles/DashboardStyles.js';
+
+const useStyles = makeStyles(styles);
 
 export default function Dashboard() {
-//   const classes = useStyles();
-//   const [data, setData] = useState();
-//   const [datapharm, setDatapharm] = useState();
-//   const [datapharmreq, setDatapharmReq] = useState();
-//   const [totalIncome, setTotalIncome] = useState();
-//   const [maxSalesPharmacy, setMaxSalesPharmacy] = useState();
-//   const [averageorders,setAverageOrders] = useState();
+  const classes = useStyles();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dataLoan, setDataLoan] = useState([]);
+  const [dataLend, setDataLend] = useState([]);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [requestType, setRequestType] = useState("");
 
-//   const getdata =() =>{
-//     const token = window.localStorage.getItem('token');
-//       axios.get(`${backendUrl}/admin/countcustomer`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results =  res.data.row;
-//         //  console.log(results);
-//         setData(results);
-//       })
-    
-//   }
-//   const getdata1 =async() =>{
-//     const token = window.localStorage.getItem('token');
-//     // console.log('xxxxx')
-//      await axios.get(`${backendUrl}/admin/countpharmacy`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results =  res.data.row;
-//         //  console.log(results);
-//         setDatapharm(results);
-//       },[])
-    
-//   }
-//   const getdata2 =async() =>{
-//     const token = window.localStorage.getItem('token');
-//      await axios.get(`${backendUrl}/admin/viewpharmacyrequests`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results =  res.data.result.length; 
-//         setDatapharmReq(results);
-//       },[])
-    
-//   }
-//   const gettotalincome =() =>{
-//     const token = window.localStorage.getItem('token');
-//       axios.get(`${backendUrl}/admin/totalmonthlyincome`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results =res.data.result[0];
-//         // console.log(results);
-//         setTotalIncome(results.sum);
-//       })
-//   }
+  useEffect(() => {
+    fetchLoanData();
+    fetchLendData();
+  }, []);
 
-//   const getmaxsalespharmacy =() =>{
-//     const token = window.localStorage.getItem('token');
-//       axios.get(`${backendUrl}/admin/maxsalespharmacy`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results=res.data.result[0];
-//         // console.log(results);
-//         setMaxSalesPharmacy(results.name);
-//       })
-//   }
+  const fetchLoanData = () => {
+    const user = JSON.parse(window.localStorage.getItem('user'));
+    const userId = user.userId;
+    axios.post(`${backendUrl}/users/loanrequests/exclude`, { userId })
+      .then(res => {
+        setDataLoan(res.data);
+      })
+      .catch(err => {
+        console.error('Error fetching loan data:', err);
+      });
+  };
 
-//   const averageorderspermonth =() =>{
-//     const token = window.localStorage.getItem('token');
-//       axios.get(`${backendUrl}/admin/averageorderspermonth`,{
-//         headers: {
-//           'Authorization': token ? `Bearer ${token}` : ''
-//         }
-//         })
-//       .then(res =>{
-//         const results=res.data.result[0];
-//         // console.log(results);
-//         setAverageOrders(results.count);
-//       })
-//   }
-  
-//   React.useEffect(()=>{
-//     getdata();
-//     getdata1();
-//     getdata2();
-//     gettotalincome();
-//     getmaxsalespharmacy();
-//     averageorderspermonth();
-//   });
-  
+  const fetchLendData = () => {
+    const user = JSON.parse(window.localStorage.getItem('user'));
+    const userId = user.userId;
+    axios.post(`${backendUrl}/users/lendrequests/exclude`, { userId })
+      .then(res => {
+        setDataLend(res.data);
+      })
+      .catch(err => {
+        console.error('Error fetching lend data:', err);
+      });
+  };
+
+  const handleClickOpenConfirm = (requestId, type) => {
+    setSelectedRequestId(requestId);
+    setRequestType(type);
+    setOpenConfirm(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+    setSelectedRequestId(null);
+    setRequestType("");
+  };
+
+  const handleConfirm = () => {
+    const user = JSON.parse(window.localStorage.getItem('user'));
+    const userId = user.userId;
+    const url = requestType === "loan"
+      ? `${backendUrl}/users/loanrequests/accept`
+      : `${backendUrl}/users/lendrequests/accept`;
+
+    axios.post(url, { requestId: selectedRequestId, acceptorId: userId })
+      .then(response => {
+        console.log(response);
+        if (requestType === "loan") fetchLoanData();
+        else fetchLendData();
+      })
+      .catch(err => {
+        console.error('Error accepting request:', err);
+      });
+
+    setOpenConfirm(false);
+  };
+
+  const columnsLoan = [
+    { id: 'createdAt', label: 'Date' },
+    { id: 'amount', label: 'Amount' },
+    { id: 'interestRate', label: 'Interest Rate' },
+    { id: 'repaymentPeriod', label: 'Repayment Period' },
+    { id: 'total', label: 'Total' },
+    { id: 'accept', label: 'Accept' }
+  ];
+
+  const columnsLend = [
+    { id: 'createdAt', label: 'Date' },
+    { id: 'amount', label: 'Amount' },
+    { id: 'interestRate', label: 'Interest Rate' },
+    { id: 'repaymentPeriod', label: 'Repayment Period' },
+    { id: 'total', label: 'Total' },
+    { id: 'accept', label: 'Accept' }
+  ];
+
   return (
-    <div>
-      <GridContainer>
-        <GridItem xs={12} sm={6} md={3}>
-          <Card>
-            sdfsdfsdfs
-            {/* <CardHeader color="primary" stats icon>
-              <CardIcon color="primary">
-                <MonetizationOnIcon />
-              </CardIcon>
-              <p className={classes.cardCategory}>Revenue</p>
-              <h3 className={classes.cardTitle}>Rs.{totalIncome}/=</h3>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                <DateRange />
-                {new Date().toLocaleString("en-US", { month: "long" })}
-              </div>
-            </CardFooter> */}
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+    <GridContainer className={classes.dashboardContainer}>
+      {/* Loan Requests Table */}
+      <GridItem xs={12}>
         <Card>
-            ddddddd
-            {/* <CardHeader color="info" stats icon> */}
-              {/* <CardIcon color="info"> */}
-                <Store />
-              {/* </CardIcon>
-              <p className={classes.cardCategory}>Registered Pharmacies</p>
-              <h3 className={classes.cardTitle}>{datapharm}</h3>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                <Update />
-                Just Updated
-              </div>
-            </CardFooter> */}
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
-          <Card>
-            ffffff
-            {/* <CardHeader color="success" stats icon>
-              <CardIcon color="success">
-                <Accessibility />
-              </CardIcon>
-              <p className={classes.cardCategory}>Customers</p>
-              <h3 className={classes.cardTitle}>{data}</h3>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                <Update />
-                Just Updated
-              </div>
-            </CardFooter> */}
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
-          <Card>
-            dddd
-            <CardHeader color="success" stats icon>
-              {/* <CardIcon color="rose">
-                <Notifications />
-              </CardIcon>
-              <p className={classes.cardCategory}>New Pharmacy Requests</p>
-              <h3 className={classes.cardTitle}>{datapharmreq}</h3> */}
-            </CardHeader>
-            {/* <CardFooter stats>
-              <div className={classes.stats}>
-                <Update />
-                Just Updated
-              </div>
-            </CardFooter> */}
-          </Card>
-        </GridItem>
-      </GridContainer>
-      <GridContainer>
-        <GridItem xs={12} sm={6} md={5}>
-            <Card>
-                  vvv
-              {/* <CardHeader>
-              </CardHeader>
-              <CardBody>
-              <SalesChart/>
-              </CardBody>
-              <CardFooter>
-                <h4 className={classes.cardTitle}>Monthly Sales of Each Registered Pharmacy</h4>
-              </CardFooter> */}
-            </Card>
-        </GridItem>
-        <GridItem xs={12} sm={6} md={4}>
-          <Card>
-            bbbbb
-            {/* <CardHeader >
-            </CardHeader>
-            <CardBody>
-              <IncomeGrowthChart/>
-            </CardBody>
-            <CardFooter chart>
-            <h4 className={classes.cardTitle}>
-            MedLink Transaction Growth
-            </h4>
-            </CardFooter> */}
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={12} md={3}>
-          <GridItem sm={6} md={12}>
-            <Card>
-                  gggggg
-              {/* <CardHeader color="primary" stats icon>
-                <CardIcon color="warning">
-                <ArrowUpward />
-                </CardIcon>
-                <p className={classes.cardCategory}>Most Outstanding Pharmacy of the Month</p>
-                <h3 className={classes.cardTitle}>{maxSalesPharmacy}</h3>
-              </CardHeader>
-              <CardFooter stats>
-              </CardFooter> */}
-            </Card>
-          </GridItem>
-          <GridItem sm={6} md={12}>
-            <Card>
-                  rrrrr
-              {/* <CardHeader color="primary" stats icon>
-                <CardIcon color="info">
-                  <MonetizationOnIcon />
-                </CardIcon>
-                <p className={classes.cardCategory}>Average Orders  Through MedLink</p>
-                <h3 className={classes.cardTitle}>{averageorders}</h3>
-              </CardHeader>
-              <CardFooter stats>
-                <div className={classes.stats}>Per Month</div>
-              </CardFooter> */}
-            </Card>
-          </GridItem>
-        </GridItem>
-      </GridContainer>
-    </div>
+          <CardHeader color="primary">
+            <h4 className={classes.cardTitleWhite}>Loan Requests</h4>
+          </CardHeader>
+          <CardBody>
+            <div>
+              <FormControl fullWidth variant="outlined" size="small">
+                <OutlinedInput
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <SearchIcon />
+                    </InputAdornment>
+                  }
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search..."
+                  fontSize="small"
+                  size="sm"
+                />
+              </FormControl>
+            </div>
+            <div className={classes.tableContainer}>
+              <TableScrollbar rows={20}>
+                <Table className={classes.table}>
+                  <TableHead>
+                    <TableRow>
+                      {columnsLoan.map((column) => (
+                        <TableCell style={{ color: 'primary', backgroundColor: "white" }} key={column.id}>
+                          {column.label}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {dataLoan.filter(row => searchTerm === "" || row.createdAt.toLowerCase().includes(searchTerm.toLowerCase())).map((row, id) => (
+                      <TableRow key={id}>
+                        <TableCell align="left">{row.createdAt}</TableCell>
+                        <TableCell align="left">{row.amount}</TableCell>
+                        <TableCell align="center">{row.interestRate}</TableCell>
+                        <TableCell align="center">{row.repaymentPeriod}</TableCell>
+                        <TableCell align="center">{row.total}</TableCell>
+                        <TableCell align="left">
+                          <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId, "loan")}>Accept</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableScrollbar>
+            </div>
+          </CardBody>
+        </Card>
+      </GridItem>
+
+      {/* Lend Requests Table */}
+      <GridItem xs={12}>
+        <Card>
+          <CardHeader color="primary">
+            <h4 className={classes.cardTitleWhite}>Lend Requests</h4>
+          </CardHeader>
+          <CardBody>
+            <div>
+              <FormControl fullWidth variant="outlined" size="small">
+                <OutlinedInput
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <SearchIcon />
+                    </InputAdornment>
+                  }
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search..."
+                  fontSize="small"
+                  size="sm"
+                />
+              </FormControl>
+            </div>
+            <div className={classes.tableContainer}>
+              <TableScrollbar rows={20}>
+                <Table className={classes.table}>
+                  <TableHead>
+                    <TableRow>
+                      {columnsLend.map((column) => (
+                        <TableCell style={{ color: 'primary', backgroundColor: "white" }} key={column.id}>
+                          {column.label}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {dataLend.filter(row => searchTerm === "" || row.createdAt.toLowerCase().includes(searchTerm.toLowerCase())).map((row, id) => (
+                      <TableRow key={id}>
+                        <TableCell align="left">{row.createdAt}</TableCell>
+                        <TableCell align="left">{row.amount}</TableCell>
+                        <TableCell align="center">{row.interestRate}</TableCell>
+                        <TableCell align="center">{row.repaymentPeriod}</TableCell>
+                        <TableCell align="center">{row.total}</TableCell>
+                        <TableCell align="left">
+                          <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId, "lend")}>Accept</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableScrollbar>
+            </div>
+          </CardBody>
+        </Card>
+      </GridItem>
+
+      {/* Confirm Dialog */}
+      <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
+        <DialogTitle id="confirm-dialog-title">Confirm Request</DialogTitle>
+        <DialogContent>
+          Are you sure you want to accept this request?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} color="primary">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </GridContainer>
   );
 }

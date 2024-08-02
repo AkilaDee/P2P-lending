@@ -91,6 +91,7 @@ export default function LoanRequests() {
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
     { id: 'total', label: 'Total'},
+    { id: 'status', label: 'Status'},
     { id: 'Requestedby', label: 'Requested By'},];
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
@@ -102,7 +103,7 @@ export default function LoanRequests() {
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Loan Requests Accepted By You</h4>
+            <h4 className={classes.cardTitleWhite}>Loan Requests Received</h4>
           </CardHeader>
           <CardBody>
             <div>
@@ -166,6 +167,9 @@ export default function LoanRequests() {
                             {/* <TableCell align="left">
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
                             </TableCell> */}
+                            <TableCell align="center">
+                              {row.status}
+                            </TableCell>
                             <TableCell align="left">
                               {row.userFirstName+" "+row.userLastName}
                             </TableCell>

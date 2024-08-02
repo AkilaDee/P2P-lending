@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.HashMap;
+import java.time.temporal.ChronoUnit;
+import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
 
 @AllArgsConstructor
 @RestController
@@ -29,22 +32,50 @@ public class UserController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<String> createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<String> createUser(
+            @RequestPart("userDto") UserDto userDto,
+            @RequestPart("proofOfIdFile") MultipartFile proofOfIdFile,
+            @RequestPart("proofOfAddressFile") MultipartFile proofOfAddressFile,
+            @RequestPart("financialInfoFile") MultipartFile financialInfoFile,
+            @RequestPart("creditScoreFile") MultipartFile creditScoreFile) {
+
         if (userRepository.existsByEmail(userDto.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("An account with this email already exists");
         }
 
+
+        try {
+            if (proofOfIdFile != null && !proofOfIdFile.isEmpty()) {
+                userDto.setProofOfId(proofOfIdFile.getBytes());
+            }
+            if (proofOfAddressFile != null && !proofOfAddressFile.isEmpty()) {
+                userDto.setProofOfAddress(proofOfAddressFile.getBytes());
+            }
+            if (financialInfoFile != null && !financialInfoFile.isEmpty()) {
+                userDto.setFinancialInfo(financialInfoFile.getBytes());
+            }
+            if (creditScoreFile != null && !creditScoreFile.isEmpty()) {
+                userDto.setCreditScore(creditScoreFile.getBytes());
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing file uploads");
+        }
+
         User user = UserMapper.mapToUser(userDto);
 
-        // Encrypt the password using BCryptPasswordEncoder
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.save(user);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User created successfully");
     }
+
+
+
 
 
     @GetMapping("{userId}")
@@ -105,7 +136,7 @@ public class UserController {
         Double currentRating = user.getRating();
         Integer currentRatingCount = user.getRatingCount();
 
-        
+
         if (currentRatingCount == null) {
             currentRatingCount = 0;
         }
@@ -121,18 +152,47 @@ public class UserController {
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
+    @PostMapping("/viewuser")
+    public ResponseEntity<UserDto> viewUserProfile(@RequestBody UserIdRequest userIdRequest) {
+        int userId = userIdRequest.getUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserDto userDto = UserMapper.mapToUserDto(user);
+        userDto.setPassword(null); // Exclude password
+        userDto.setEmail(null);
+        return ResponseEntity.ok(userDto);
+    }
     // LendRequest endpoints
 
     @PostMapping("/lendrequests/exclude")
-    public ResponseEntity<List<LendRequestDto>> getAllLendRequestsExcludingCurrentUser(@RequestBody UserIdRequest userIdRequest) {
+    public ResponseEntity<List<Object>> getAllLendRequestsExcludingCurrentUser(@RequestBody UserIdRequest userIdRequest) {
         int userId = userIdRequest.getUserId();
-        List<LendRequest> lendRequests = lendRequestRepository.findByUser_UserIdNotAndStatus(userId, "PENDING");
+        List<Object[]> results = lendRequestRepository.findByUser_UserIdNotAndStatus(userId);
 
-        List<LendRequestDto> lendRequestDtos = lendRequests.stream()
-                .map(LendRequestMapper::mapToLendRequestDto)
-                .collect(Collectors.toList());
+        List<Object> response = results.stream().map(result -> {
+            LendRequest lendRequest = (LendRequest) result[0];
+            int requestorId = (int) result[1];
+            String firstName = (String) result[2];
+            String lastName = (String) result[3];
 
-        return new ResponseEntity<>(lendRequestDtos, HttpStatus.OK);
+            return new Object() {
+                public final int lendRequestId = lendRequest.getLendRequestId();
+                public final int userId = lendRequest.getUser().getUserId();
+                public final Double amount = lendRequest.getAmount();
+                public final Double total = lendRequest.getTotal();
+                public final Double interestRate = lendRequest.getInterestRate();
+                public final Integer repaymentPeriod = lendRequest.getRepaymentPeriod();
+                public final String status = lendRequest.getStatus();
+                public final LocalDateTime createdAt = lendRequest.getCreatedAt();
+                public final LocalDateTime updatedAt = lendRequest.getUpdatedAt();
+                public final Integer acceptedBy = lendRequest.getAcceptedBy() != null ? lendRequest.getAcceptedBy().getUserId() : null;
+                public final int requestedUserId = requestorId;
+                public final String requestedByFirstName = firstName;
+                public final String requestedByLastName = lastName;
+            };
+        }).collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     public static class UserIdRequest {
@@ -152,9 +212,11 @@ public class UserController {
         int userId = lendRequestDto.getUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         LendRequest lendRequest = LendRequestMapper.mapToLendRequest(lendRequestDto, user, null);
+
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         lendRequest.setStatus("PENDING");
-        lendRequest.setCreatedAt(LocalDateTime.now());
-        lendRequest.setUpdatedAt(LocalDateTime.now());
+        lendRequest.setCreatedAt(now);
+        lendRequest.setUpdatedAt(now);
         lendRequest = lendRequestRepository.save(lendRequest);
         LendRequestDto savedLendRequest = LendRequestMapper.mapToLendRequestDto(lendRequest);
         return new ResponseEntity<>(savedLendRequest, HttpStatus.CREATED);
@@ -173,7 +235,7 @@ public class UserController {
 
         lendRequest.setAcceptedBy(acceptor);
         lendRequest.setStatus("APPROVED");
-        lendRequest.setUpdatedAt(LocalDateTime.now());
+        lendRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
 
         lendRequest = lendRequestRepository.save(lendRequest);
         LendRequestDto updatedLendRequest = LendRequestMapper.mapToLendRequestDto(lendRequest);
@@ -215,8 +277,9 @@ public class UserController {
 
         List<Object> response = results.stream().map(result -> {
             LendRequest lendRequest = (LendRequest) result[0];
-            String firstName = (String) result[1];
-            String lastName = (String) result[2];
+            int acceptorId = (int) result[1];
+            String firstName = (String) result[2];
+            String lastName = (String) result[3];
 
             return new Object() {
                 public final int lendRequestId = lendRequest.getLendRequestId();
@@ -229,6 +292,7 @@ public class UserController {
                 public final LocalDateTime createdAt = lendRequest.getCreatedAt();
                 public final LocalDateTime updatedAt = lendRequest.getUpdatedAt();
                 public final Integer acceptedBy = lendRequest.getAcceptedBy() != null ? lendRequest.getAcceptedBy().getUserId() : null;
+                public final int acceptedUserId = acceptorId;
                 public final String acceptedByFirstName = firstName;
                 public final String acceptedByLastName = lastName;
             };
@@ -244,8 +308,9 @@ public class UserController {
 
         List<Object> response = results.stream().map(result -> {
             LendRequest lendRequest = (LendRequest) result[0];
-            String firstName = (String) result[1];
-            String lastName = (String) result[2];
+            int acceptorId = (int) result[1];
+            String firstName = (String) result[2];
+            String lastName = (String) result[3];
 
             return new Object() {
                 public final int lendRequestId = lendRequest.getLendRequestId();
@@ -257,6 +322,7 @@ public class UserController {
                 public final String status = lendRequest.getStatus();
                 public final LocalDateTime createdAt = lendRequest.getCreatedAt();
                 public final LocalDateTime updatedAt = lendRequest.getUpdatedAt();
+                public final int acceptedUserId = acceptorId;
                 public final String userFirstName = firstName;
                 public final String userLastName = lastName;
             };
@@ -265,22 +331,73 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PostMapping("/lendrequests/pay")
+    public ResponseEntity<LendRequestDto> payLendRequest(@RequestBody Map<String, Integer> requestMap) {
+        int lendRequestId = requestMap.get("lendRequestId");
 
+        LendRequest lendRequest = lendRequestRepository.findById(lendRequestId)
+                .orElseThrow(() -> new RuntimeException("Lend request not found"));
+
+
+        lendRequest.setStatus("PAID");
+        lendRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+
+        lendRequest = lendRequestRepository.save(lendRequest);
+        LendRequestDto updatedLendRequest = LendRequestMapper.mapToLendRequestDto(lendRequest);
+
+        return ResponseEntity.ok(updatedLendRequest);
+    }
+
+    @PostMapping("/lendrequests/payback")
+    public ResponseEntity<LendRequestDto> payBackLendRequest(@RequestBody Map<String, Integer> requestMap) {
+        int lendRequestId = requestMap.get("lendRequestId");
+
+        LendRequest lendRequest = lendRequestRepository.findById(lendRequestId)
+                .orElseThrow(() -> new RuntimeException("Lend request not found"));
+
+
+        lendRequest.setStatus("CLOSED");
+        lendRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+
+        lendRequest = lendRequestRepository.save(lendRequest);
+        LendRequestDto updatedLendRequest = LendRequestMapper.mapToLendRequestDto(lendRequest);
+
+        return ResponseEntity.ok(updatedLendRequest);
+    }
 
 
 
 
     // LoanRequest endpoints
     @PostMapping("/loanrequests/exclude")
-    public ResponseEntity<List<LoanRequestDto>> getAllLoanRequestsExcludingCurrentUser(@RequestBody UserIdRequest userIdRequest) {
+    public ResponseEntity<List<Object>> getAllLoanRequestsExcludingCurrentUser(@RequestBody UserIdRequest userIdRequest) {
         int userId = userIdRequest.getUserId();
-        List<LoanRequest> loanRequests = loanRequestRepository.findByUser_UserIdNotAndStatus(userId, "PENDING");
+        List<Object[]> results = loanRequestRepository.findByUser_UserIdNotAndStatus(userId);
 
-        List<LoanRequestDto> loanRequestDtos = loanRequests.stream()
-                .map(LoanRequestMapper::mapToLoanRequestDto)
-                .collect(Collectors.toList());
+        List<Object> response = results.stream().map(result -> {
+            LoanRequest loanRequest = (LoanRequest) result[0];
+            int requestorId = (int) result[1];
+            String firstName = (String) result[2];
+            String lastName = (String) result[3];
 
-        return new ResponseEntity<>(loanRequestDtos, HttpStatus.OK);
+            return new Object() {
+                public final int lendRequestId = loanRequest.getLoanRequestId();
+                public final int userId = loanRequest.getUser().getUserId();
+                public final Double amount = loanRequest.getAmount();
+                public final Double total = loanRequest.getTotal();
+                public final Double interestRate = loanRequest.getInterestRate();
+                public final Integer repaymentPeriod = loanRequest.getRepaymentPeriod();
+                public final String status = loanRequest.getStatus();
+                public final LocalDateTime createdAt = loanRequest.getCreatedAt();
+                public final LocalDateTime updatedAt = loanRequest.getUpdatedAt();
+                public final Integer acceptedBy = loanRequest.getAcceptedBy() != null ? loanRequest.getAcceptedBy().getUserId() : null;
+                public final int requestedUserId = requestorId;
+                public final String requestedByFirstName = firstName;
+                public final String requestedByLastName = lastName;
+            };
+        }).collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
@@ -290,8 +407,8 @@ public class UserController {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         LoanRequest loanRequest = LoanRequestMapper.mapToLoanRequest(loanRequestDto, user, null);
         loanRequest.setStatus("PENDING");
-        loanRequest.setCreatedAt(LocalDateTime.now());
-        loanRequest.setUpdatedAt(LocalDateTime.now());
+        loanRequest.setCreatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+        loanRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
         loanRequest = loanRequestRepository.save(loanRequest);
         LoanRequestDto savedLoanRequest = LoanRequestMapper.mapToLoanRequestDto(loanRequest);
         return new ResponseEntity<>(savedLoanRequest, HttpStatus.CREATED);
@@ -317,8 +434,8 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         loanRequest.setAcceptedBy(acceptor);
-        loanRequest.setStatus("APPROVED");
-        loanRequest.setUpdatedAt(LocalDateTime.now());
+        loanRequest.setStatus("PAID");
+        loanRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
 
         loanRequest = loanRequestRepository.save(loanRequest);
         LoanRequestDto updatedLoanRequest = LoanRequestMapper.mapToLoanRequestDto(loanRequest);
@@ -363,8 +480,9 @@ public class UserController {
 
         List<Object> response = results.stream().map(result -> {
             LoanRequest loanRequest = (LoanRequest) result[0];
-            String firstName = (String) result[1];
-            String lastName = (String) result[2];
+            int acceptorId = (int) result[1];
+            String firstName = (String) result[2];
+            String lastName = (String) result[3];
 
             return new Object() {
                 public final int loanRequestId = loanRequest.getLoanRequestId();
@@ -377,6 +495,7 @@ public class UserController {
                 public final LocalDateTime createdAt = loanRequest.getCreatedAt();
                 public final LocalDateTime updatedAt = loanRequest.getUpdatedAt();
                 public final Integer acceptedBy = loanRequest.getAcceptedBy() != null ? loanRequest.getAcceptedBy().getUserId() : null;
+                public final int acceptedUserId = acceptorId;
                 public final String acceptedByFirstName = firstName;
                 public final String acceptedByLastName = lastName;
             };
@@ -392,8 +511,9 @@ public class UserController {
 
         List<Object> response = results.stream().map(result -> {
             LoanRequest loanRequest = (LoanRequest) result[0];
-            String firstName = (String) result[1];
-            String lastName = (String) result[2];
+            int requestorId = (int) result[1];
+            String firstName = (String) result[2];
+            String lastName = (String) result[3];
 
             return new Object() {
                 public final int loanRequestId = loanRequest.getLoanRequestId();
@@ -405,6 +525,7 @@ public class UserController {
                 public final String status = loanRequest.getStatus();
                 public final LocalDateTime createdAt = loanRequest.getCreatedAt();
                 public final LocalDateTime updatedAt = loanRequest.getUpdatedAt();
+                public final int requestedUserId = requestorId;
                 public final String userFirstName = firstName;
                 public final String userLastName = lastName;
             };
@@ -413,5 +534,29 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PostMapping("/loanrequests/payback")
+    public ResponseEntity<LoanRequestDto> payBackLoanRequest(@RequestBody Map<String, Integer> requestMap) {
+        Logger logger = LoggerFactory.getLogger(UserController.class);
+
+        Integer loanRequestId = requestMap.get("loanRequestId");
+
+        if (loanRequestId == null) {
+            throw new RuntimeException("loanRequestId must be provided");
+        }
+
+        logger.info("Received acceptLoanRequest with loanRequestId: {}", loanRequestId);
+
+        LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
+                .orElseThrow(() -> new RuntimeException("Loan request not found"));
+
+
+        loanRequest.setStatus("PAID");
+        loanRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+
+        loanRequest = loanRequestRepository.save(loanRequest);
+        LoanRequestDto updatedLoanRequest = LoanRequestMapper.mapToLoanRequestDto(loanRequest);
+
+        return ResponseEntity.ok(updatedLoanRequest);
+    }
 }
 

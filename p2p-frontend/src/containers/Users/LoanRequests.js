@@ -134,6 +134,7 @@ export default function LendRequests() {
     { id: 'interestRate', label: 'Interest Rate' },
     { id: 'repaymentPeriod', label: 'Repayment Period' },
     { id: 'total', label: 'Total' },
+    { id: 'requestedBy', label: 'Requested By'},
     { id: 'accept', label: 'Accept' }
   ];
   const rows = data;
@@ -197,6 +198,9 @@ export default function LendRequests() {
                       </TableCell>
                       <TableCell align="center">
                         {row.total}
+                      </TableCell>
+                      <TableCell align="center">
+                      {row.requestedByFirstName+" "+row.requestedByLastName}
                       </TableCell>
                       <TableCell align="left">
                         <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId)}>Accept</Button>

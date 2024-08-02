@@ -29,35 +29,81 @@ import Button from "../../components/Dashboard/Button/Button.js";
 // import PhotoSteps from "../../components/admin/dialogbox/PhotoSteps";
 
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe('your-publishable-key');
+
 
 const useStyles = makeStyles(styles);
+function CheckoutForm({ amount, onPaymentSuccess }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setProcessing(true);
+
+    const { data: { clientSecret } } = await axios.post('/create-payment-intent', { amount });
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: elements.getElement(CardElement),
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setProcessing(false);
+    } else if (paymentIntent.status === 'succeeded') {
+      setProcessing(false);
+      onPaymentSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <CardElement />
+      {error && <div>{error}</div>}
+      <button type="submit" disabled={!stripe || processing}>
+        {processing ? 'Processing...' : 'Pay'}
+      </button>
+    </form>
+  );
+}
 export default function LendRequests() {
   const classes = useStyles();
   const [searchTerm, setSearchTerm] = useState(""); //for search function
-
+  const [openPayment, setOpenPayment] = useState(false);
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [selectedLendRequestId, setSelectedLendRequestId] = useState(null);
 
   // Function to open the confirm dialog
   const handleClickOpenConfirm = (lendRequestId) => {
-    // const userId = window.localStorage.getItem('userId');
-    
     setSelectedLendRequestId(lendRequestId);
     setOpenConfirm(true);
   };
 
-  // Function to close the confirm dialog
   const handleCloseConfirm = () => {
     setOpenConfirm(false);
     setSelectedLendRequestId(null);
   };
 
-  // Function to handle the confirm action
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    setOpenConfirm(false);
+    setOpenPayment(true);
+  };
+
+  const handlePaymentSuccess = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
-   const userId = user.userId;
-    axios.post(`${backendUrl}/users/lendrequests/accept`, { lendRequestId: selectedLendRequestId, acceptorId: userId })
+    const userId = user.userId;
+    axios.post(`${backendUrl}/users/lendrequests/pay`, { loanRequestId: selectedLendRequestId, payerId: userId })
       .then((response) => {
         console.log(response);
         fetchData();
@@ -65,7 +111,7 @@ export default function LendRequests() {
       .catch((err) => {
         console.log(err);
       });
-    setOpenConfirm(false);
+    setOpenPayment(false);
   };
 
  //backend connection
@@ -91,7 +137,10 @@ export default function LendRequests() {
     { id: 'interestRate', label: 'Interest Rate'},
     { id: 'repaymentPeriod', label: 'Repayment Period'},
     { id: 'total', label: 'Total'},
-    { id: 'acceptedByFirstName', label: 'Accepted By'},];
+    { id: 'acceptedByFirstName', label: 'Accepted By'},
+    { id: 'status', label: 'Status'},
+    { id: 'pay', label: 'Pay' },];
+    
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
 
@@ -169,6 +218,14 @@ export default function LendRequests() {
                             <TableCell align="left">
                             {row.acceptedByFirstName +" "+ row.acceptedByLastName}
                             </TableCell>
+                            <TableCell align="center">
+                              {row.status}
+                            </TableCell>
+                            <TableCell align="left">
+                                {row.status === 'APPROVED' && (
+                                <Button size="sm" color="danger" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Pay</Button>
+                              )}
+                            </TableCell>
                           </TableRow>
                           );
                         }
@@ -200,6 +257,27 @@ export default function LendRequests() {
         </Button>
       </DialogActions>
     </Dialog>
+    <Dialog 
+        onClose={() => setOpenPayment(false)} 
+        aria-labelledby="payment-dialog-title" 
+        open={openPayment}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="payment-dialog-title">
+          Payment
+        </DialogTitle>
+        <DialogContent>
+          <Elements stripe={stripePromise}>
+            <CheckoutForm amount={10000} onPaymentSuccess={handlePaymentSuccess} />
+          </Elements>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenPayment(false)} color="primary">
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </GridContainer>
   );
 }

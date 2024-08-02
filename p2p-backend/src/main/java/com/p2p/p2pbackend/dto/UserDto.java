@@ -1,4 +1,5 @@
 package com.p2p.p2pbackend.dto;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,10 +15,10 @@ public class UserDto {
     private String lastName;
     private String email;
     private String password;
-    private String proofOfId;
-    private String proofOfAddress;
-    private String financialInfo;
-    private String creditScore;
+    private byte[] proofOfId;        // Changed to byte[]
+    private byte[] proofOfAddress;   // Changed to byte[]
+    private byte[] financialInfo;    // Changed to byte[]
+    private byte[] creditScore;      // Changed to byte[]
     private boolean activeStatus;
     private double rating;
     private int ratingCount;

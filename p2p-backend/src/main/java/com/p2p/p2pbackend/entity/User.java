@@ -21,29 +21,42 @@ public class User {
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
+
     @Column(name = "last_name")
     private String lastName;
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Lob
     @Column(name = "proof_of_id")
-    private String proofOfId;
+    private byte[] proofOfId;
+
+    @Lob
     @Column(name = "proof_of_address")
-    private String proofOfAddress;
+    private byte[] proofOfAddress;
+
+    @Lob
     @Column(name = "financial_info")
-    private String financialInfo;
+    private byte[] financialInfo;
+
+    @Lob
     @Column(name = "credit_score")
-    private String creditScore;
+    private byte[] creditScore;
+
     @Column(name = "active_status")
-    private boolean activeStatus= false;
+    private boolean activeStatus = false;
+
     @Column(name = "rating")
     private double rating = 5.0;
+
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
     public boolean getActiveStatus() {
-
         return activeStatus;
     }
 }
