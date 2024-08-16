@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { backendUrl } from '../../UrlConfig.js';
-import TableScrollbar from 'react-table-scrollbar';
 
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
-import { Table, TableHead, TableBody, TableCell, TableRow } from "@material-ui/core";
+import { Table, TableHead, TableBody, TableCell, TableRow, TableContainer, Paper } from "@material-ui/core";
+import DialogContentText from '@material-ui/core/DialogContentText';
 
 import SearchIcon from '@material-ui/icons/Search';
 
@@ -33,10 +32,14 @@ const useStyles = makeStyles(styles);
 
 export default function UserRequests() {
   const classes = useStyles();
-  const [searchTerm, setSearchTerm] = useState(""); // for search function
+  const [searchTerm, setSearchTerm] = useState(""); // For search function
 
-  // Popup dialogbox
+  // Popup dialog box for rejection
   const [openReject, setOpenReject] = useState(false);
+  const [userId, setUserId] = useState();
+  const [rejectReason, setRejectReason] = useState();
+  const [email, setEmail] = useState();
+
   const handleClickOpenReject = (userId, email) => {
     setOpenReject(true);
     setUserId(userId);
@@ -46,10 +49,6 @@ export default function UserRequests() {
     setOpenReject(false);
   };
   
-  // Backend connection for reject user
-  const [userId, setUserId] = useState();
-  const [rejectReason, setRejectReason] = useState();
-  const [email, setEmail] = useState();
   const rejectUser = () => {
     axios.post(`${backendUrl}/admin/users/delete`, { userId, rejectReason, email })
       .then((response) => {
@@ -59,40 +58,77 @@ export default function UserRequests() {
       })
       .catch((err) => {
         console.log(err);
-      });
-  };
-  
-  // Backend connection for accept user
-  const acceptUser = (userId) => {
-    axios.post(`${backendUrl}/admin/users/accept`, { userId })
-      .then((response) => {
-        console.log(response);
-        getData();
-      })
-      .catch((err) => {
-        console.log(err);
+        handleCloseReject();
       });
   };
 
+  // Popup dialog box for acceptance
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [confirmUserId, setConfirmUserId] = useState(null);
+
+  const handleClickOpenConfirm = (userId) => {
+    setConfirmUserId(userId);
+    setOpenConfirm(true);
+  };
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+  };
+
+  const acceptUserConfirmed = () => {
+    if (confirmUserId !== null) {
+      axios.post(`${backendUrl}/admin/users/accept`, { userId: confirmUserId })
+        .then((response) => {
+          console.log(response);
+          getData();
+          handleCloseConfirm();
+        })
+        .catch((err) => {
+          console.log(err);
+          handleCloseConfirm();
+        });
+    }
+  };
+
+  // Popup dialog box for viewing documents
   const [open, setOpen] = useState(false);
   const [doc1, setDoc1] = useState('');
   const [doc2, setDoc2] = useState('');
   const [doc3, setDoc3] = useState('');
   const [doc4, setDoc4] = useState('');
 
-
-  const handleClickOpen = (document1, document2, document3,document4) => {
+  const handleClickOpen = (document1, document2, document3, document4) => {
     setDoc1(document1);
     setDoc2(document2);
     setDoc3(document3);
-    setDoc4(document4)
+    setDoc4(document4);
     setOpen(true);
   };
   const handleClose = () => {
     setOpen(false);
   };
 
-  // Backend connection
+  // Convert file to Base64
+  const convertToBase64 = (file, setState) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setState(reader.result); // Update the state with Base64 string
+    };
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Convert to Base64 and update the state
+      convertToBase64(file, setDoc1); 
+      convertToBase64(file, setDoc2); 
+      convertToBase64(file, setDoc3); 
+      convertToBase64(file, setDoc4); 
+
+    }
+  };
+
+  // Fetch inactive users from the backend
   const [data, setData] = useState([]);
   const getData = () => {
     axios.get(`${backendUrl}/admin/users/inactive`)
@@ -119,7 +155,7 @@ export default function UserRequests() {
     { id: 'activate', label: 'Activate' },
     { id: 'reject', label: 'Reject' },
   ];
-  
+
   const rows = data || []; // Fallback to empty array if data is undefined
 
   return (
@@ -145,8 +181,8 @@ export default function UserRequests() {
                 />
               </FormControl>
             </div>
-            <TableScrollbar rows={20}>
-              <Table>
+            <TableContainer component={Paper} style={{ maxHeight: 440 }}>
+              <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                   <TableRow>
                     {columns.map((column) => (
@@ -180,23 +216,20 @@ export default function UserRequests() {
                       <TableCell align="left">
                         {row.email}
                       </TableCell>
-                      {/* <TableCell align="left">
-                        {row.contactnumber}
-                      </TableCell> */}
                       <TableCell align="left">
-                        <Button size='sm' color="primary" onClick={() => handleClickOpen(row.document1, row.document2, row.document3, row.document4)}>View</Button>
+                        <Button size='sm' color="primary" onClick={() => handleClickOpen(row.proofOfId, row.proofOfAddress, row.financialInfo, row.creditScore)}>View</Button>
                       </TableCell>
                       <TableCell>
-                        <Button size='sm' color="primary" onClick={() => acceptUser(row.userId)}>Accept</Button>
+                        <Button size='sm' color="primary" onClick={() => handleClickOpenConfirm(row.userId)}>Accept</Button>
                       </TableCell>
                       <TableCell align="left">
-                        <Button size='sm' color="danger" onClick={() => handleClickOpenReject(row.userId)}>Reject</Button>
+                        <Button size='sm' color="danger" onClick={() => handleClickOpenReject(row.userId, row.email)}>Reject</Button>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </TableScrollbar>
+            </TableContainer>
           </CardBody>
         </Card>
       </GridItem>
@@ -230,10 +263,11 @@ export default function UserRequests() {
           <TextField
             autoFocus
             margin="dense"
-            id="name"
-            onChange={(e) => setRejectReason(e.target.value)}
-            label="State the reason"
+            label="Reason"
+            type="text"
             fullWidth
+            variant="outlined"
+            onChange={(e) => setRejectReason(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
@@ -241,7 +275,31 @@ export default function UserRequests() {
             Cancel
           </Button>
           <Button onClick={rejectUser} color="primary">
-            Send
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Accept button confirmation dialog box */}
+      <Dialog
+        open={openConfirm}
+        onClose={handleCloseConfirm}
+        aria-labelledby="confirmation-dialog-title"
+      >
+        <DialogTitle id="confirmation-dialog-title">
+          Confirm Acceptance
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to accept this user registration request?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={acceptUserConfirmed} color="primary">
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>

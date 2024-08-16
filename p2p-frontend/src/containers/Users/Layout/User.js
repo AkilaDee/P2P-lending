@@ -58,7 +58,7 @@ export default function User({ ...rest }) {
   }, []);
 
   //Filter out the profile route for the sidebar
-  const sidebarRoutes = routes.filter(route => route.path !== '/profile'|| route.path !== '/viewuser');
+  const sidebarRoutes = routes.filter(route => route.path !== '/profile'&& route.path !== '/viewuser/:userId');
 
   return (
     <div className={classes.wrapper}>

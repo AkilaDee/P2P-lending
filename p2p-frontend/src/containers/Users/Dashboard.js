@@ -1,248 +1,104 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { backendUrl } from '../../UrlConfig.js';
-import TableScrollbar from 'react-table-scrollbar';
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import AppAppBar from './../../components/mainLandingPage/AppAppBar';
+import Features from './../../components/mainLandingPage/Features';
+import Testimonials from './../../components/mainLandingPage/Testimonials';
+import Highlights from './../../components/mainLandingPage/Highlights';
+import FAQ from './../../components/mainLandingPage/Footer';
+import Footer from './../../components/mainLandingPage/Footer';
+import getLPTheme from './../../components/mainLandingPage/GetLpTheme';
+import pf from './../../components/Dashboard/Images/peerfund.png'; // Ensure the image is correctly imported
 
-// @material-ui/core components
-import { makeStyles } from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import FormControl from '@material-ui/core/FormControl';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
-import { Table, TableHead, TableBody, TableCell, TableRow } from '@material-ui/core';
+function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100dvw',
+        position: 'fixed',
+        bottom: 24,
+      }}
+    >
+      <ToggleButtonGroup
+        color="primary"
+        exclusive
+        value={showCustomTheme}
+        onChange={toggleCustomTheme}
+        aria-label="Platform"
+        sx={{
+          backgroundColor: 'background.default',
+          '& .Mui-selected': {
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <ToggleButton value>
+          <AutoAwesomeRoundedIcon sx={{ fontSize: '20px', mr: 1 }} />
+          Custom theme
+        </ToggleButton>
+        <ToggleButton value={false}>Material Design 2</ToggleButton>
+      </ToggleButtonGroup>
+    </Box>
+  );
+}
 
-import SearchIcon from '@material-ui/icons/Search';
+ToggleCustomTheme.propTypes = {
+  showCustomTheme: PropTypes.shape({
+    valueOf: PropTypes.func.isRequired,
+  }).isRequired,
+  toggleCustomTheme: PropTypes.func.isRequired,
+};
 
-// core components
-import GridItem from '../../components/Dashboard/Grid/GridItem.js';
-import GridContainer from '../../components/Dashboard/Grid/GridContainer.js';
-import Card from '../../components/Dashboard/Card/Card.js';
-import CardHeader from '../../components/Dashboard/Card/CardHeader.js';
-import CardBody from '../../components/Dashboard/Card/CardBody.js';
-import Button from '../../components/Dashboard/Button/Button.js';
+export default function LandingPage() {
+  const [mode, setMode] = React.useState('light');
+  const [showCustomTheme, setShowCustomTheme] = React.useState(true);
+  const LPtheme = createTheme(getLPTheme(mode));
+  const defaultTheme = createTheme({ palette: { mode } });
 
-import styles from '../../components/Dashboard/Styles/DashboardStyles.js';
-
-const useStyles = makeStyles(styles);
-
-export default function Dashboard() {
-  const classes = useStyles();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dataLoan, setDataLoan] = useState([]);
-  const [dataLend, setDataLend] = useState([]);
-  const [openConfirm, setOpenConfirm] = useState(false);
-  const [selectedRequestId, setSelectedRequestId] = useState(null);
-  const [requestType, setRequestType] = useState("");
-
-  useEffect(() => {
-    fetchLoanData();
-    fetchLendData();
-  }, []);
-
-  const fetchLoanData = () => {
-    const user = JSON.parse(window.localStorage.getItem('user'));
-    const userId = user.userId;
-    axios.post(`${backendUrl}/users/loanrequests/exclude`, { userId })
-      .then(res => {
-        setDataLoan(res.data);
-      })
-      .catch(err => {
-        console.error('Error fetching loan data:', err);
-      });
+  const toggleColorMode = () => {
+    setMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const fetchLendData = () => {
-    const user = JSON.parse(window.localStorage.getItem('user'));
-    const userId = user.userId;
-    axios.post(`${backendUrl}/users/lendrequests/exclude`, { userId })
-      .then(res => {
-        setDataLend(res.data);
-      })
-      .catch(err => {
-        console.error('Error fetching lend data:', err);
-      });
+  const toggleCustomTheme = () => {
+    setShowCustomTheme((prev) => !prev);
   };
-
-  const handleClickOpenConfirm = (requestId, type) => {
-    setSelectedRequestId(requestId);
-    setRequestType(type);
-    setOpenConfirm(true);
-  };
-
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-    setSelectedRequestId(null);
-    setRequestType("");
-  };
-
-  const handleConfirm = () => {
-    const user = JSON.parse(window.localStorage.getItem('user'));
-    const userId = user.userId;
-    const url = requestType === "loan"
-      ? `${backendUrl}/users/loanrequests/accept`
-      : `${backendUrl}/users/lendrequests/accept`;
-
-    axios.post(url, { requestId: selectedRequestId, acceptorId: userId })
-      .then(response => {
-        console.log(response);
-        if (requestType === "loan") fetchLoanData();
-        else fetchLendData();
-      })
-      .catch(err => {
-        console.error('Error accepting request:', err);
-      });
-
-    setOpenConfirm(false);
-  };
-
-  const columnsLoan = [
-    { id: 'createdAt', label: 'Date' },
-    { id: 'amount', label: 'Amount' },
-    { id: 'interestRate', label: 'Interest Rate' },
-    { id: 'repaymentPeriod', label: 'Repayment Period' },
-    { id: 'total', label: 'Total' },
-    { id: 'accept', label: 'Accept' }
-  ];
-
-  const columnsLend = [
-    { id: 'createdAt', label: 'Date' },
-    { id: 'amount', label: 'Amount' },
-    { id: 'interestRate', label: 'Interest Rate' },
-    { id: 'repaymentPeriod', label: 'Repayment Period' },
-    { id: 'total', label: 'Total' },
-    { id: 'accept', label: 'Accept' }
-  ];
 
   return (
-    <GridContainer className={classes.dashboardContainer}>
-      {/* Loan Requests Table */}
-      <GridItem xs={12}>
-        <Card>
-          <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Loan Requests</h4>
-          </CardHeader>
-          <CardBody>
-            <div>
-              <FormControl fullWidth variant="outlined" size="small">
-                <OutlinedInput
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <SearchIcon />
-                    </InputAdornment>
-                  }
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search..."
-                  fontSize="small"
-                  size="sm"
-                />
-              </FormControl>
-            </div>
-            <div className={classes.tableContainer}>
-              <TableScrollbar rows={20}>
-                <Table className={classes.table}>
-                  <TableHead>
-                    <TableRow>
-                      {columnsLoan.map((column) => (
-                        <TableCell style={{ color: 'primary', backgroundColor: "white" }} key={column.id}>
-                          {column.label}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {dataLoan.filter(row => searchTerm === "" || row.createdAt.toLowerCase().includes(searchTerm.toLowerCase())).map((row, id) => (
-                      <TableRow key={id}>
-                        <TableCell align="left">{row.createdAt}</TableCell>
-                        <TableCell align="left">{row.amount}</TableCell>
-                        <TableCell align="center">{row.interestRate}</TableCell>
-                        <TableCell align="center">{row.repaymentPeriod}</TableCell>
-                        <TableCell align="center">{row.total}</TableCell>
-                        <TableCell align="left">
-                          <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId, "loan")}>Accept</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableScrollbar>
-            </div>
-          </CardBody>
-        </Card>
-      </GridItem>
-
-      {/* Lend Requests Table */}
-      <GridItem xs={12}>
-        <Card>
-          <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Lend Requests</h4>
-          </CardHeader>
-          <CardBody>
-            <div>
-              <FormControl fullWidth variant="outlined" size="small">
-                <OutlinedInput
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <SearchIcon />
-                    </InputAdornment>
-                  }
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="Search..."
-                  fontSize="small"
-                  size="sm"
-                />
-              </FormControl>
-            </div>
-            <div className={classes.tableContainer}>
-              <TableScrollbar rows={20}>
-                <Table className={classes.table}>
-                  <TableHead>
-                    <TableRow>
-                      {columnsLend.map((column) => (
-                        <TableCell style={{ color: 'primary', backgroundColor: "white" }} key={column.id}>
-                          {column.label}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {dataLend.filter(row => searchTerm === "" || row.createdAt.toLowerCase().includes(searchTerm.toLowerCase())).map((row, id) => (
-                      <TableRow key={id}>
-                        <TableCell align="left">{row.createdAt}</TableCell>
-                        <TableCell align="left">{row.amount}</TableCell>
-                        <TableCell align="center">{row.interestRate}</TableCell>
-                        <TableCell align="center">{row.repaymentPeriod}</TableCell>
-                        <TableCell align="center">{row.total}</TableCell>
-                        <TableCell align="left">
-                          <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId, "lend")}>Accept</Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableScrollbar>
-            </div>
-          </CardBody>
-        </Card>
-      </GridItem>
-
-      {/* Confirm Dialog */}
-      <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
-        <DialogTitle id="confirm-dialog-title">Confirm Request</DialogTitle>
-        <DialogContent>
-          Are you sure you want to accept this request?
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirm} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm} color="primary">
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </GridContainer>
+    <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
+      <CssBaseline />
+      {/* <AppAppBar mode={mode} toggleColorMode={toggleColorMode} /> */}
+      <Box sx={{ height: '100vh', overflowY: 'auto', bgcolor: 'background.default' }}>
+        {/* Add the image element here */}
+        {/* <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 2 }}>
+          <img 
+            src={pf} 
+            alt="Peerfund logo" 
+            style={{ maxWidth: '50%', height: 'auto' }} 
+          />
+        </Box> */}
+        <Features />
+        <Divider />
+        <Testimonials />
+        <Divider />
+        <Highlights />
+        {/* <Divider />
+        <FAQ />
+        <Divider /> */}
+        {/* <Footer /> */}
+      </Box>
+      <ToggleCustomTheme
+        showCustomTheme={showCustomTheme}
+        toggleCustomTheme={toggleCustomTheme}
+      />
+    </ThemeProvider>
   );
 }

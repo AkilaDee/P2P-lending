@@ -31,20 +31,16 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Lob
-    @Column(name = "proof_of_id")
+    @Column(name = "proof_of_id", columnDefinition = "bytea")
     private byte[] proofOfId;
 
-    @Lob
-    @Column(name = "proof_of_address")
+    @Column(name = "proof_of_address", columnDefinition = "bytea")
     private byte[] proofOfAddress;
 
-    @Lob
-    @Column(name = "financial_info")
+    @Column(name = "financial_info", columnDefinition = "bytea")
     private byte[] financialInfo;
 
-    @Lob
-    @Column(name = "credit_score")
+    @Column(name = "credit_score", columnDefinition = "bytea")
     private byte[] creditScore;
 
     @Column(name = "active_status")

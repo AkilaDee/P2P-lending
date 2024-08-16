@@ -1,7 +1,5 @@
-
 import * as React from 'react';
 import PropTypes from 'prop-types';
-
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
@@ -13,12 +11,12 @@ import AppAppBar from './../../components/mainLandingPage/AppAppBar';
 import Hero from './../../components/mainLandingPage/Hero';
 import LogoCollection from './../../components/mainLandingPage/LogoCollection';
 import Highlights from './../../components/mainLandingPage/Highlights';
-import Pricing from './../../components/mainLandingPage/Pricing';
 import Features from './../../components/mainLandingPage/Features';
 import Testimonials from './../../components/mainLandingPage/Testimonials';
 import FAQ from './../../components/mainLandingPage/Footer';
-import Footer from './../../components/mainLandingPage/Footer'
+import Footer from './../../components/mainLandingPage/Footer';
 import getLPTheme from './../../components/mainLandingPage/GetLpTheme';
+import pf from './../../components/Dashboard/Images/peerfund.png'; // Ensure the image is correctly imported
 
 function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
   return (
@@ -80,16 +78,20 @@ export default function LandingPage() {
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
       <AppAppBar mode={mode} toggleColorMode={toggleColorMode} />
-      <Hero />
       <Box sx={{ bgcolor: 'background.default' }}>
-        <LogoCollection />
+        {/* Add the image element here */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: -15 }}>  
+          <img 
+            src={pf} 
+            alt="Peerfund logo" 
+            style={{ maxWidth: '50%', height: 'auto' }} 
+          />
+        </Box>
         <Features />
         <Divider />
         <Testimonials />
         <Divider />
         <Highlights />
-        <Divider />
-        <Pricing />
         <Divider />
         <FAQ />
         <Divider />

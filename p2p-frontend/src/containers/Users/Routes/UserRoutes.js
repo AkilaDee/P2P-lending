@@ -1,4 +1,6 @@
 import Dashboard from "@material-ui/icons/Dashboard";
+import input from '@mui/icons-material/DriveFileMove';
+import output from '@mui/icons-material/ResetTv';
 import DashboardPage from "../Dashboard.js";
 import LendRequests from "../LendRequests.js";
 import LoanRequests from "../LoanRequests.js";
@@ -25,56 +27,56 @@ const UserRoutes = [
     component: LendRequests,
     path: "/lendrequests",
     name: "Lend Requests",
-    icon: Dashboard, 
+    icon: input, 
     layout: "/user",
   },
   {
     component: LoanRequests,
     path: "/loanrequests",
     name: "Loan Requests",
-    icon: Dashboard, 
+    icon: output, 
     layout: "/user",
   },
   {
     component: AddLendRequest,
     path: "/addlendrequest",
     name: "Add Lend Request",
-    icon: Dashboard, 
+    icon: input, 
     layout: "/user",
   },
   {
     component: AddLoanRequest,
     path: "/addloanrequest",
     name: "Add Loan Request",
-    icon: Dashboard, 
-    layout: "/user",
-  },
-  {
-    component: YourAcceptedLendRequests,
-    path: "/YourAcceptedLendRequests",
-    name: "Your Accepted Lend Requests",
-    icon: Dashboard, 
+    icon: output, 
     layout: "/user",
   },
   {
     component: YourAcceptedLoanRequests,
-    path: "/YourAcceptedLoanRequests",
-    name: "Your Accepted Loan Requests",
-    icon: Dashboard, 
-    layout: "/user",
-  },
-  {
-    component: AcceptedLendRequestsByYou,
-    path: "/AcceptedLendRequestsByYou",
-    name: "Received Lend Requests",
-    icon: Dashboard, 
+    path: "/sentloanrequests",
+    name: "Sent Loan Requests",
+    icon: output, 
     layout: "/user",
   },
   {
     component: AcceptedLoanRequestsByYou,
-    path: "/AcceptedLoanRequestsByYou",
+    path: "/receivedloanrequests",
     name: "Received Loan Requests",
-    icon: Dashboard, 
+    icon: output, 
+    layout: "/user",
+  },
+  {
+    component: YourAcceptedLendRequests,
+    path: "/sentlendrequests",
+    name: "Sent Lend Requests",
+    icon: input, 
+    layout: "/user",
+  },
+  {
+    component: AcceptedLendRequestsByYou,
+    path: "/receivedlendrequests",
+    name: "Received Lend Requests",
+    icon: input, 
     layout: "/user",
   },
   {
@@ -86,7 +88,7 @@ const UserRoutes = [
   },
   {
     component: ViewUser,
-    path: "/viewuser",
+    path: "/viewuser/:userId",
     name: "View User",
     icon: Dashboard, 
     layout: "/user",

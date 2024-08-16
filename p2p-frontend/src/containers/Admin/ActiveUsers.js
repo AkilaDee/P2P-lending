@@ -34,16 +34,12 @@ const useStyles = makeStyles(styles);
 export default function UserRequests() {
   const classes = useStyles();
   const [searchTerm, setSearchTerm] = useState(""); // for search function
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
 
   // Popup dialogbox
-  const [openReject, setOpenReject] = useState(false);
-  const handleClickOpenReject = (userId, email) => {
-    setOpenReject(true);
-    setUserId(userId);
-  };
-  const handleCloseReject = () => {
-    setOpenReject(false);
-  };
+  const [openDisableDialog, setOpenDisableDialog] = useState(false);
+  
   
   // Backend connection for reject user
   const [userId, setUserId] = useState();
@@ -66,6 +62,30 @@ export default function UserRequests() {
   };
   const handleClose = () => {
     setOpen(false);
+  };
+  const handleOpenDisableDialog = (userId) => {
+    setSelectedUserId(userId);
+    setOpenDisableDialog(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+  };
+  const handleDisableCloseConfirm = () => {
+    setOpenDisableDialog(false);
+  };
+
+  const handleDisableConfirm = () => {
+   
+    axios.post(`${backendUrl}/admin/users/disable`, { userId: selectedUserId })
+      .then(response => {
+        console.log(response);
+        getData(); 
+      })
+      .catch(err => {
+        console.log(err);
+      });
+      setOpenDisableDialog(false);
   };
 
   // Backend connection
@@ -160,6 +180,9 @@ export default function UserRequests() {
                       <TableCell align="left">
                         <Button size='sm' color="primary" onClick={() => handleClickOpen(row.document1, row.document2, row.document3, row.document4)}>View</Button>
                       </TableCell>
+                      <TableCell>
+                          <Button size="sm" color="primary" onClick={() => handleOpenDisableDialog(row.userId)}>Disable</Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -182,7 +205,16 @@ export default function UserRequests() {
           </Button>
         </DialogActions>
       </Dialog>
-     
+      <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openDisableDialog}>
+        <DialogTitle id="confirm-dialog-title">Confirm Action</DialogTitle>
+        <DialogContent dividers>
+          Are you sure you want to Disable this request?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDisableCloseConfirm} color="primary">No</Button>
+          <Button onClick={handleDisableConfirm} color="primary">Yes</Button>
+        </DialogActions>
+      </Dialog>
       
     </GridContainer>
   );

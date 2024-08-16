@@ -1,4 +1,7 @@
-import * as React from 'react';
+import React, { useState } from "react";
+import axios from 'axios';
+import { backendUrl } from '../../UrlConfig.js';
+import { Redirect } from 'react-router-dom'; // Import Redirect
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -26,19 +29,58 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-// const classes = useStyles();
 const defaultTheme = createTheme();
 
 export default function SignUp() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [proofOfId, setProofOfId] = useState(null);
+  const [proofOfAddress, setProofOfAddress] = useState(null);
+  const [financialInfo, setFinancialInfo] = useState(null);
+  const [creditScore, setCreditScore] = useState(null);
+  const [redirect, setRedirect] = useState(false); // State to control redirection
+
+  const handleFileChange = (setter) => (event) => {
+    setter(event.target.files[0]);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+    
+    const form = new FormData();
+    const userDto = JSON.stringify({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password
+    });
+
+    form.append("userDto", new Blob([userDto], { type: "application/json" }));
+    form.append("proofOfIdFile", proofOfId);
+    form.append("proofOfAddressFile", proofOfAddress);
+    form.append("financialInfoFile", financialInfo);
+    form.append("creditScoreFile", creditScore);
+
+    axios.post(`${backendUrl}/users/signup`, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    .then((response) => {
+      console.log(response);
+      setRedirect(true); // Set redirect state to true on success
+    })
+    .catch((err) => {
+      console.log(err);
     });
   };
+
+  // If redirect state is true, redirect to the dashboard
+  if (redirect) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -69,6 +111,7 @@ export default function SignUp() {
                   id="firstName"
                   label="First Name"
                   autoFocus
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -79,6 +122,7 @@ export default function SignUp() {
                   label="Last Name"
                   name="lastName"
                   autoComplete="family-name"
+                  onChange={(e) => setLastName(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -89,6 +133,7 @@ export default function SignUp() {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -100,6 +145,7 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </Grid>
               <Grid item xs={12} sm={5} md={5}>
@@ -110,10 +156,8 @@ export default function SignUp() {
               <Grid item xs={12} sm={7} md={7}>
                 <input
                   accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
+                  onChange={handleFileChange(setCreditScore)}
+                  id="credit-score-file"
                   type="file"
                 />
               </Grid>
@@ -125,10 +169,8 @@ export default function SignUp() {
               <Grid item xs={12} sm={7} md={7}>
                 <input
                   accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
+                  onChange={handleFileChange(setFinancialInfo)}
+                  id="financial-info-file"
                   type="file"
                 />
               </Grid>
@@ -140,10 +182,8 @@ export default function SignUp() {
               <Grid item xs={12} sm={7} md={7}>
                 <input
                   accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
+                  onChange={handleFileChange(setProofOfId)}
+                  id="proof-id-file"
                   type="file"
                 />
               </Grid>
@@ -155,19 +195,12 @@ export default function SignUp() {
               <Grid item xs={12} sm={7} md={7}>
                 <input
                   accept="image/*"
-                  // onChange={handleRegisterDocs}
-                  // className={classes.input}
-                  id="contained-button-file"
-                  multiple
+                  onChange={handleFileChange(setProofOfAddress)}
+                  id="proof-address-file"
                   type="file"
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive inspiration, marketing promotions and updates via email."
-                />
-              </Grid>
+              
             </Grid>
             <Button
               type="submit"

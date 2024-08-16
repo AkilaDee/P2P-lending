@@ -13,6 +13,7 @@ import com.p2p.p2pbackend.service.EmailService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Base64;
 
 @AllArgsConstructor
 @RestController
@@ -56,6 +57,11 @@ public class AdminController {
         int userId = Integer.parseInt(requestMap.get("userId"));
         String rejectReason = requestMap.get("rejectReason");
         String email = requestMap.get("email");
+
+        if (rejectReason == null || rejectReason.isEmpty()) {
+            rejectReason = "No specific reason provided.";
+        }
+
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -73,6 +79,7 @@ public class AdminController {
     public ResponseEntity<List<UserDto>> getAllActiveUsers() {
         List<User> activeUsers = userRepository.findByActiveStatusTrue();
         List<UserDto> userDtos = activeUsers.stream()
+                .filter(user -> !("admin@peerfund.com".equals(user.getEmail()))) // Exclude users with "admin" email
                 .map(user -> {
                     UserDto userDto = UserMapper.mapToUserDto(user);
                     userDto.setPassword(null); // Exclude password
@@ -80,5 +87,19 @@ public class AdminController {
                 })
                 .collect(Collectors.toList());
         return new ResponseEntity<>(userDtos, HttpStatus.OK);
+    }
+
+
+    @PostMapping("/users/disable")
+    public ResponseEntity<UserDto> disableUser(@RequestBody Map<String, Integer> requestMap) {
+        int userId = requestMap.get("userId");
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActiveStatus(false);
+        user.setRating(0);
+        User savedUser = userRepository.save(user);
+
+        UserDto userDto = userMapper.mapToUserDto(savedUser);
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 }

@@ -5,9 +5,13 @@ import com.p2p.p2pbackend.entity.*;
 import com.p2p.p2pbackend.mapper.*;
 import com.p2p.p2pbackend.repository.*;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,16 +23,62 @@ import java.util.HashMap;
 import java.time.temporal.ChronoUnit;
 import java.io.IOException;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.Arrays;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:3000")
+@Slf4j
 public class UserController {
 
     private final UserRepository userRepository;
     private final LendRequestRepository lendRequestRepository;
     private final LoanRequestRepository loanRequestRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+
+//    @PostMapping("/signup")
+//    public ResponseEntity<String> createUser(
+//            @RequestPart("userDto") UserDto userDto,
+//            @RequestPart("proofOfIdFile") MultipartFile proofOfIdFile,
+//            @RequestPart("proofOfAddressFile") MultipartFile proofOfAddressFile,
+//            @RequestPart("financialInfoFile") MultipartFile financialInfoFile,
+//            @RequestPart("creditScoreFile") MultipartFile creditScoreFile) {
+//
+//        try {
+//            // Convert files to byte arrays
+//            byte[] proofOfId = proofOfIdFile.getBytes();
+//            byte[] proofOfAddress = proofOfAddressFile.getBytes();
+//            byte[] financialInfo = financialInfoFile.getBytes();
+//            byte[] creditScore = creditScoreFile.getBytes();
+//
+//            // Create User entity
+//            User user = new User();
+//            user.setFirstName(userDto.getFirstName());
+//            user.setLastName(userDto.getLastName());
+//            user.setEmail(userDto.getEmail());
+//            user.setPassword(new BCryptPasswordEncoder().encode(userDto.getPassword()));
+//            user.setProofOfId(proofOfId);
+//            user.setProofOfAddress(proofOfAddress);
+//            user.setFinancialInfo(financialInfo);
+//            user.setCreditScore(creditScore);
+//
+//            // Check for existing email
+//            if (userRepository.existsByEmail(user.getEmail())) {
+//                return ResponseEntity.status(HttpStatus.CONFLICT)
+//                        .body("An account with this email already exists");
+//            }
+//
+//            // Save user and return response
+//            userRepository.save(user);
+//            return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
+//        } catch (IOException e) {
+//            logger.error("Error processing file uploads", e);
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error processing file uploads: " + e.getMessage());
+//        }
+//    }
 
 
     @PostMapping("/signup")
@@ -44,8 +94,8 @@ public class UserController {
                     .body("An account with this email already exists");
         }
 
-
         try {
+
             if (proofOfIdFile != null && !proofOfIdFile.isEmpty()) {
                 userDto.setProofOfId(proofOfIdFile.getBytes());
             }
@@ -60,7 +110,7 @@ public class UserController {
             }
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing file uploads");
+                    .body("Error processing file uploads: " + e.getMessage());
         }
 
         User user = UserMapper.mapToUser(userDto);
@@ -73,9 +123,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User created successfully");
     }
-
-
-
 
 
     @GetMapping("{userId}")
@@ -102,6 +149,14 @@ public class UserController {
             throw new RuntimeException("Invalid password");
         }
 
+        if(user.getRating()==0){
+            throw new RuntimeException("User is disabled");
+        }
+
+        if(!user.getActiveStatus()){
+            throw new RuntimeException("User is not accepted");
+        }
+
         UserDto userDto = UserMapper.mapToUserDto(user);
         Map<String, Object> response = new HashMap<>();
         response.put("user", userDto);
@@ -126,8 +181,58 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    @PostMapping("/submitrating")
-    public ResponseEntity<UserDto> submitUserRating(@RequestBody Map<String, Object> requestMap) {
+    @PostMapping("/loanrequest/submitrating")
+    public ResponseEntity<UserDto> submitLoanRequestRating(@RequestBody Map<String, Object> requestMap) {
+        int loanRequestId = (int) requestMap.get("loanRequestId");
+        int userId = (int) requestMap.get("userId");
+        double submittedRating = ((Number) requestMap.get("rating")).doubleValue();
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Double currentRating = user.getRating();
+        Integer currentRatingCount = user.getRatingCount();
+
+
+        if (currentRatingCount == null) {
+            currentRatingCount = 0;
+        }
+
+        double newRating = ((currentRating * currentRatingCount) + submittedRating) / (currentRatingCount + 1);
+        user.setRating(newRating);
+        user.setRatingCount(currentRatingCount + 1);
+
+        userRepository.save(user);
+
+        UserDto userDto = UserMapper.mapToUserDto(user);
+
+        LoanRequest loanRequest = loanRequestRepository.findById(loanRequestId)
+                .orElseThrow(() -> new RuntimeException("Lend request not found"));
+
+        if(userId == loanRequest.getUser().getUserId()) {
+            if("CLOSED".equals(loanRequest.getStatus())) {
+                loanRequest.setStatus("CLOSED/Rated by Acceptor");
+            } else {
+                loanRequest.setStatus("CLOSED/Rated by Both");
+            }
+        } else {
+            if("CLOSED".equals(loanRequest.getStatus())) {
+                loanRequest.setStatus("CLOSED/Rated by Requester");
+            } else {
+                loanRequest.setStatus("CLOSED/Rated by Both");
+            }
+        }
+
+        loanRequest = loanRequestRepository.save(loanRequest);
+        LoanRequestDto updatedLoanRequest = LoanRequestMapper.mapToLoanRequestDto(loanRequest);
+
+
+        return new ResponseEntity<>(userDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/lendrequest/submitrating")
+    public ResponseEntity<UserDto> submitLendRequestRating(@RequestBody Map<String, Object> requestMap) {
+        int lendRequestId = (int) requestMap.get("lendRequestId");
         int userId = (int) requestMap.get("userId");
         double submittedRating = ((Number) requestMap.get("rating")).doubleValue();
         User user = userRepository.findByUserId(userId)
@@ -148,6 +253,25 @@ public class UserController {
         userRepository.save(user);
 
         UserDto userDto = UserMapper.mapToUserDto(user);
+
+        LendRequest lendRequest = lendRequestRepository.findById(lendRequestId)
+                .orElseThrow(() -> new RuntimeException("Lend request not found"));
+
+        if(userId == lendRequest.getUser().getUserId()) {
+            if("CLOSED".equals(lendRequest.getStatus())) {
+                lendRequest.setStatus("CLOSED/Rated by Acceptor");
+            } else {
+                lendRequest.setStatus("CLOSED/Rated by Both");
+            }
+        } else {
+            if("CLOSED".equals(lendRequest.getStatus())) {
+                lendRequest.setStatus("CLOSED/Rated by Requester");
+            } else {
+                lendRequest.setStatus("CLOSED/Rated by Both");
+            }
+        }
+        lendRequest = lendRequestRepository.save(lendRequest);
+        LendRequestDto updatedLendRequest = LendRequestMapper.mapToLendRequestDto(lendRequest);
 
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }

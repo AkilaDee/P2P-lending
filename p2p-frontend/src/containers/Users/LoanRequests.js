@@ -24,6 +24,7 @@ import Card from "../../components/Dashboard/Card/Card.js";
 import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
 import CardBody from "../../components/Dashboard/Card/CardBody.js";
 import Button from "../../components/Dashboard/Button/Button.js";
+import { Link } from 'react-router-dom';
 
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
 import { loadStripe } from '@stripe/stripe-js';
@@ -200,8 +201,13 @@ export default function LendRequests() {
                         {row.total}
                       </TableCell>
                       <TableCell align="center">
-                      {row.requestedByFirstName+" "+row.requestedByLastName}
-                      </TableCell>
+                          <Link
+                            to={`/user/viewuser/${row.requestedUserId}`}
+                            style={{ textDecoration: 'underline', color: 'inherit' }}
+                          >
+                            {row.requestedByFirstName + " " + row.requestedByLastName}
+                          </Link>
+                        </TableCell>
                       <TableCell align="left">
                         <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId)}>Accept</Button>
                       </TableCell>

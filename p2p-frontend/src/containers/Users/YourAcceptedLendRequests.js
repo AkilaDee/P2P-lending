@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-key */
-import React,{useState} from "react";
+import React,{useState, useEffect} from "react";
 import axios from 'axios';
 import { backendUrl } from '../../UrlConfig.js'
 import TableScrollbar from 'react-table-scrollbar'
@@ -18,6 +18,7 @@ import OutlinedInput from '@material-ui/core/OutlinedInput';
 import { Table,TableHead, TableBody, TableCell, TableRow } from "@material-ui/core";
 
 import SearchIcon from '@material-ui/icons/Search';
+import Rating from 'react-rating-stars-component'; 
 
 // core components
 import GridItem from "../../components/Dashboard/Grid/GridItem.js";
@@ -31,11 +32,12 @@ import Button from "../../components/Dashboard/Button/Button.js";
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Link } from 'react-router-dom';
 
 const stripePromise = loadStripe('your-publishable-key');
 
-
 const useStyles = makeStyles(styles);
+
 function CheckoutForm({ amount, onPaymentSuccess }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -77,14 +79,18 @@ function CheckoutForm({ amount, onPaymentSuccess }) {
     </form>
   );
 }
+
 export default function LendRequests() {
   const classes = useStyles();
-  const [searchTerm, setSearchTerm] = useState(""); //for search function
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [openPayment, setOpenPayment] = useState(false);
-  const [openConfirm, setOpenConfirm] = React.useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedLendRequestId, setSelectedLendRequestId] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null); 
+  const [rating, setRating] = useState(0); 
+  const [openRateDialog, setOpenRateDialog] = useState(false);
+  const [data, setData] = useState([]);
 
-  // Function to open the confirm dialog
   const handleClickOpenConfirm = (lendRequestId) => {
     setSelectedLendRequestId(lendRequestId);
     setOpenConfirm(true);
@@ -100,13 +106,25 @@ export default function LendRequests() {
     setOpenPayment(true);
   };
 
+  const handleCloseRateDialog = () => {
+    setOpenRateDialog(false);
+    setSelectedLendRequestId(null);
+    setSelectedUserId(null); 
+  };
+
+  const handleOpenRateDialog = (LoanRequestId, userId) => {
+    setSelectedLendRequestId(LoanRequestId);
+    setSelectedUserId(userId); 
+    setOpenRateDialog(true);
+  };
+
   const handlePaymentSuccess = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
     const userId = user.userId;
     axios.post(`${backendUrl}/users/lendrequests/pay`, { loanRequestId: selectedLendRequestId, payerId: userId })
       .then((response) => {
         console.log(response);
-        fetchData();
+        fetchData(); // Refresh the data after payment
       })
       .catch((err) => {
         console.log(err);
@@ -114,22 +132,37 @@ export default function LendRequests() {
     setOpenPayment(false);
   };
 
- //backend connection
- const [data, setData] = useState([]);
- const fetchData = () => {
-  const user = JSON.parse(window.localStorage.getItem('user'));
-  const userId = user.userId;
-   axios.post(`${backendUrl}/users/lendrequests/accepted`, { userId: userId })
-     .then(res => {
-       setData(res.data); // Set the received data
-     })
-     .catch(err => {
-       console.error("Error fetching data:", err);
-     });
- };
-  React.useEffect(()=>{
+  const handleSubmitRating = () => {
+    axios.post(`${backendUrl}/users/lendrequest/submitrating`, { 
+      lendRequestId: selectedLendRequestId, 
+      userId: selectedUserId, 
+      rating: rating 
+    })
+    .then(response => {
+      console.log("Rating saved:", response.data);
+      setOpenRateDialog(false);
+      fetchData(); // Refresh the data after rating
+    })
+    .catch(err => {
+      console.error("Error saving rating:", err);
+    });
+  };
+
+  const fetchData = () => {
+    const user = JSON.parse(window.localStorage.getItem('user'));
+    const userId = user.userId;
+    axios.post(`${backendUrl}/users/lendrequests/accepted`, { userId: userId })
+      .then(res => {
+        setData(res.data); 
+      })
+      .catch(err => {
+        console.error("Error fetching data:", err);
+      });
+  };
+
+  useEffect(() => {
     fetchData();
-  },[]);
+  }, []);
 
   const columns = [
     { id: 'createdAt', label: 'Date'},
@@ -139,7 +172,7 @@ export default function LendRequests() {
     { id: 'total', label: 'Total'},
     { id: 'acceptedByFirstName', label: 'Accepted By'},
     { id: 'status', label: 'Status'},
-    { id: 'pay', label: 'Pay' },];
+    { id: 'Action', label: 'Action' },];
     
   const rows = data; 
   // const rows = ['ddd','dsdsds']; 
@@ -216,7 +249,12 @@ export default function LendRequests() {
                             <Button size='sm' color="primary" onClick={()=>handleClickOpen(row.document1,row.document2,row.document3)}>View</Button>
                             </TableCell> */}
                             <TableCell align="left">
-                            {row.acceptedByFirstName +" "+ row.acceptedByLastName}
+                            <Link
+                                to={`/user/viewuser/${row.acceptedUserId}`}
+                                style={{ textDecoration: 'underline', color: 'inherit' }}
+                              >
+                                {row.acceptedByFirstName + " " + row.acceptedByLastName}
+                          </Link>
                             </TableCell>
                             <TableCell align="center">
                               {row.status}
@@ -224,6 +262,9 @@ export default function LendRequests() {
                             <TableCell align="left">
                                 {row.status === 'APPROVED' && (
                                 <Button size="sm" color="danger" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Pay</Button>
+                              )}
+                              {(row.status === 'CLOSED' || row.status ==='CLOSED/Rated by Acceptor')&& (
+                                <Button size="sm" color="primary" onClick={() => handleOpenRateDialog(row.lendRequestId, row.acceptedUserId)}>Rate</Button>
                               )}
                             </TableCell>
                           </TableRow>
@@ -275,6 +316,34 @@ export default function LendRequests() {
         <DialogActions>
           <Button onClick={() => setOpenPayment(false)} color="primary">
             Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog 
+        onClose={handleCloseRateDialog} 
+        aria-labelledby="rate-dialog-title" 
+        open={openRateDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="rate-dialog-title">
+          Rate This User
+        </DialogTitle>
+        <DialogContent dividers>
+          <Rating
+            count={5}
+            size={48}
+            value={rating}
+            onChange={(newRating) => setRating(newRating)}
+            activeColor="#ffd700"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRateDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmitRating} color="primary">
+            Submit
           </Button>
         </DialogActions>
       </Dialog>

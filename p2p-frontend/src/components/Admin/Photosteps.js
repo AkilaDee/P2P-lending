@@ -8,29 +8,6 @@ import Button from '@material-ui/core/Button';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
-
-const tutorialSteps = [
-  {
-    label: 'Credit Score',
-    imgPath: 'http://ohlums.com/certificate/18.jpg',
-  },
-  {
-    label: 'Financial Document/Bank statement',
-    imgPath:
-    'https://ayurveda-in-paradise.com/img-gal/cert1_new.jpg',
-  },
-  {
-    label: 'Proof of Address',
-    imgPath:
-      'http://www.mirissawhalewarriors.com/images/certificats/Certificate_of__Individual_Business_Name_Registration.jpg',
-  },
-  {
-    label: 'Proof of ID',
-    imgPath:
-      'http://www.mirissawhalewarriors.com/images/certificats/Certificate_of__Individual_Business_Name_Registration.jpg',
-  },
-];
-
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 400,
@@ -44,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.default,
   },
   img: {
-    width: '100%',
     maxWidth: 600,
     overflow: 'hidden',
     display: 'block',
@@ -52,13 +28,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function TextMobileStepper(props) {
-  const { doc1, doc2, doc3 } = props;
-  let images=[doc1,doc2,doc3]
+export default function TextMobileStepper({ doc1, doc2, doc3, doc4 }) {
   const classes = useStyles();
   const theme = useTheme();
+  const images = [doc1, doc2, doc3, doc4].filter(Boolean); // Filter out undefined or null values
+  const maxSteps = images.length;
+
   const [activeStep, setActiveStep] = React.useState(0);
-  const maxSteps = tutorialSteps.length;
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -68,34 +44,39 @@ export default function TextMobileStepper(props) {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
+  const labels = ['Credit Score', 'Financial Document/Bank Statement', 'Proof of Address', 'Proof of ID'];
+
   return (
     <div className={classes.root}>
       <Paper square elevation={0} className={classes.header}>
-        <Typography>{tutorialSteps[activeStep].label}</Typography>
+        <Typography>{labels[activeStep]}</Typography>
       </Paper>
-      {doc1}
-      <img
-        className={classes.img}
-        src={images[activeStep]}
-        alt={images[activeStep]}
-      />
+      {images[activeStep] ? (
+        <img
+          className={classes.img}
+          src={`data:image/jpeg;base64,${images[activeStep]}`}
+          alt={labels[activeStep]}
+        />
+      ) : (
+        <Typography>No image available</Typography>
+      )}
       <MobileStepper
         steps={maxSteps}
         position="static"
         variant="text"
         activeStep={activeStep}
-        nextButton={(
+        nextButton={
           <Button size="small" onClick={handleNext} disabled={activeStep === maxSteps - 1}>
             Next
             {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
           </Button>
-        )}
-        backButton={(
+        }
+        backButton={
           <Button size="small" onClick={handleBack} disabled={activeStep === 0}>
             {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
             Back
           </Button>
-        )}
+        }
       />
     </div>
   );
@@ -105,5 +86,5 @@ TextMobileStepper.propTypes = {
   doc1: PropTypes.string,
   doc2: PropTypes.string,
   doc3: PropTypes.string,
-
+  doc4: PropTypes.string,
 };

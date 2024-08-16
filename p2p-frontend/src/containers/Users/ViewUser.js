@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { backendUrl } from '../../UrlConfig.js';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -14,7 +14,6 @@ import GridContainer from "../../components/Dashboard/Grid/GridContainer.js";
 import Card from "../../components/Dashboard/Card/Card.js";
 import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
 import CardBody from "../../components/Dashboard/Card/CardBody.js";
-import Button from "../../components/Dashboard/Button/Button.js";
 
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
 
@@ -22,38 +21,36 @@ const useStyles = makeStyles(styles);
 
 export default function ViewUser() {
   const classes = useStyles();
-  const history = useHistory();
-  const [userData, setUserData] = useState({
+  const [data, setData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
-    rating: 0
+    // email: '',
+    rating: 0 // Initialize with a default rating value
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const history = useHistory();
+  const { userId } = useParams(); 
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.post(`${backendUrl}/users/viewuser`, { userId });
+      setData(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError('Failed to fetch user data.');
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('selectedUser');
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      getUserData(user.userId);
+    if (userId) {
+      fetchData();
     } else {
       history.push('/');
     }
-  }, [history]);
-
-  const getUserData = (userId) => {
-    axios.post(`${backendUrl}/users/viewuser`, { userId })
-      .then(res => {
-        setUserData(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.log(err);
-        setError('Failed to fetch user data.');
-        setLoading(false);
-      });
-  };
+  }, [userId, history]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -75,26 +72,30 @@ export default function ViewUser() {
               <TableBody>
                 <TableRow>
                   <TableCell component="th" scope="row">First Name</TableCell>
-                  <TableCell>{userData.firstName}</TableCell>
+                  <TableCell>{data.firstName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell component="th" scope="row">Last Name</TableCell>
-                  <TableCell>{userData.lastName}</TableCell>
+                  <TableCell>{data.lastName}</TableCell>
                 </TableRow>
-                <TableRow>
+                {/* <TableRow>
                   <TableCell component="th" scope="row">Email</TableCell>
-                  <TableCell>{userData.email}</TableCell>
-                </TableRow>
+                  <TableCell>{data.email}</TableCell>
+                </TableRow> */}
                 <TableRow>
                   <TableCell component="th" scope="row">Average Rating</TableCell>
                   <TableCell>
                     <Rating
                       name="read-only"
-                      value={userData.rating}
+                      value={data.rating}
                       precision={0.5}
                       readOnly
                     />
                   </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell component="th" scope="row">Number of rating</TableCell>
+                  <TableCell>{data.ratingCount}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

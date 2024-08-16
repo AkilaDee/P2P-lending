@@ -1,10 +1,8 @@
-/* eslint-disable react/jsx-key */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { backendUrl } from '../../UrlConfig.js';
 import TableScrollbar from 'react-table-scrollbar';
-
-// @material-ui/core components
+import Rating from 'react-rating-stars-component'; 
 import { makeStyles } from "@material-ui/core/styles";
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -14,73 +12,33 @@ import FormControl from '@material-ui/core/FormControl';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import { Table, TableHead, TableBody, TableCell, TableRow } from "@material-ui/core";
-
 import SearchIcon from '@material-ui/icons/Search';
-
-// core components
 import GridItem from "../../components/Dashboard/Grid/GridItem.js";
 import GridContainer from "../../components/Dashboard/Grid/GridContainer.js";
 import Card from "../../components/Dashboard/Card/Card.js";
 import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
 import CardBody from "../../components/Dashboard/Card/CardBody.js";
 import Button from "../../components/Dashboard/Button/Button.js";
-
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from '../../components/mainLandingPage/CheckOutForm.js'; 
+import { Link } from 'react-router-dom';
 
 const stripePromise = loadStripe('your-publishable-key');
 
 const useStyles = makeStyles(styles);
 
-function CheckoutForm({ amount, onPaymentSuccess }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [error, setError] = useState(null);
-  const [processing, setProcessing] = useState(false);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setProcessing(true);
-
-    const { data: { clientSecret } } = await axios.post('/create-payment-intent', { amount });
-
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-      },
-    });
-
-    if (error) {
-      setError(error.message);
-      setProcessing(false);
-    } else if (paymentIntent.status === 'succeeded') {
-      setProcessing(false);
-      onPaymentSuccess();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <CardElement />
-      {error && <div>{error}</div>}
-      <button type="submit" disabled={!stripe || processing}>
-        {processing ? 'Processing...' : 'Pay'}
-      </button>
-    </form>
-  );
-}
-
 export default function LoanRequests() {
   const classes = useStyles();
-  const [searchTerm, setSearchTerm] = useState(""); // for search function
+  const [data, setData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [openPayment, setOpenPayment] = useState(false);
   const [openConfirm, setOpenConfirm] = React.useState(false);
+  const [openRateDialog, setOpenRateDialog] = useState(false);
   const [selectedLoanRequestId, setSelectedLoanRequestId] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null); 
+  const [rating, setRating] = useState(0); 
 
   const handleClickOpenConfirm = (LoanRequestId) => {
     setSelectedLoanRequestId(LoanRequestId);
@@ -97,34 +55,53 @@ export default function LoanRequests() {
     setOpenPayment(true);
   };
 
-  const handlePaymentSuccess = () => {
-    const user = JSON.parse(window.localStorage.getItem('user'));
-    const userId = user.userId;
-    axios.post(`${backendUrl}/users/Loanrequests/pay`, { LoanRequestId: selectedLoanRequestId, payerId: userId })
-      .then((response) => {
-        console.log(response);
-        fetchData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    setOpenPayment(false);
+  const handleOpenRateDialog = (LoanRequestId, acceptedUserId) => {
+    setSelectedLoanRequestId(LoanRequestId);
+    setSelectedUserId(acceptedUserId); 
+    setOpenRateDialog(true);
   };
 
-  // backend connection
-  const [data, setData] = useState([]);
+  const handleCloseRateDialog = () => {
+    setOpenRateDialog(false);
+    setSelectedLoanRequestId(null);
+    setSelectedUserId(null); 
+  };
+
+  const handleSubmitRating = () => {
+    axios.post(`${backendUrl}/users/loanrequest/submitrating`, { 
+      loanRequestId: selectedLoanRequestId, 
+      userId: selectedUserId, 
+      rating: rating 
+    })
+    .then(response => {
+      console.log("Rating saved:", response.data);
+      setOpenRateDialog(false);
+      fetchData(); // Refresh data after submitting the rating
+    })
+    .catch(err => {
+      console.error("Error saving rating:", err);
+    });
+  };
+
+  const handlePaymentSuccess = () => {
+    // Assuming that you have a way to capture when the payment is successful
+    setOpenPayment(false);
+    fetchData(); // Refresh data after payment success
+  };
+
   const fetchData = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
     const userId = user.userId;
     axios.post(`${backendUrl}/users/loanrequests/accepted`, { userId: userId })
       .then(res => {
-        setData(res.data); // Set the received data
+        setData(res.data);
       })
       .catch(err => {
         console.error("Error fetching data:", err);
       });
   };
-  React.useEffect(() => {
+  
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -136,8 +113,9 @@ export default function LoanRequests() {
     { id: 'total', label: 'Total' },
     { id: 'acceptedByFirstName', label: 'Accepted By' },
     { id: 'status', label: 'Status' },
-    { id: 'payback', label: 'Pay back' }
+    { id: 'action', label: 'Action' }
   ];
+
   const rows = data;
 
   return (
@@ -205,14 +183,22 @@ export default function LoanRequests() {
                           {row.total}
                         </TableCell>
                         <TableCell align="left">
-                          {row.acceptedByFirstName + " " + row.acceptedByLastName}
+                          <Link
+                            to={`/user/viewuser/${row.acceptedUserId}`}
+                            style={{ textDecoration: 'underline', color: 'inherit' }}
+                          >
+                            {row.acceptedByFirstName + " " + row.acceptedByLastName}
+                          </Link>
                         </TableCell>
                         <TableCell align="center">
                           {row.status}
                         </TableCell>
                         <TableCell align="left">
                           {row.status === 'PAID' && (
-                            <Button size="sm" color="danger" onClick={() => handleClickOpenConfirm(row.LoanRequestId)}>Pay Back</Button>
+                            <Button size="sm" color="danger" onClick={() => handleClickOpenConfirm(row.loanRequestId)}>Pay Back</Button>
+                          )}
+                          {(row.status === 'CLOSED' || row.status ==='CLOSED/Rated by Acceptor')&& (
+                            <Button size="sm" color="primary" onClick={() => handleOpenRateDialog(row.loanRequestId, row.acceptedUserId)}>Rate</Button>
                           )}
                         </TableCell>
                       </TableRow>
@@ -242,6 +228,8 @@ export default function LoanRequests() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Payment Dialog */}
       <Dialog 
         onClose={() => setOpenPayment(false)} 
         aria-labelledby="payment-dialog-title" 
@@ -254,12 +242,42 @@ export default function LoanRequests() {
         </DialogTitle>
         <DialogContent>
           <Elements stripe={stripePromise}>
-            <CheckoutForm amount={10000} onPaymentSuccess={handlePaymentSuccess} />
+            <CheckoutForm onClose={() => setOpenPayment(false)} onPaymentSuccess={handlePaymentSuccess} />
           </Elements>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenPayment(false)} color="primary">
             Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Rate Dialog */}
+      <Dialog 
+        onClose={handleCloseRateDialog} 
+        aria-labelledby="rate-dialog-title" 
+        open={openRateDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle id="rate-dialog-title">
+          Rate This User
+        </DialogTitle>
+        <DialogContent dividers>
+          <Rating
+            count={5}
+            size={48}
+            value={rating}
+            onChange={(newRating) => setRating(newRating)}
+            activeColor="#ffd700"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRateDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmitRating} color="primary">
+            Submit
           </Button>
         </DialogActions>
       </Dialog>
