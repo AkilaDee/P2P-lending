@@ -111,7 +111,8 @@ export default function UserRequests() {
     { id: 'firstName', label: 'First Name' },
     { id: 'lastName', label: 'Last Name' },
     { id: 'email', label: 'Email' },
-    { id: 'document', label: 'Documents' }
+    { id: 'document', label: 'Documents' },
+    { id: 'actions', label: 'Actions' },
   ];
   
   const rows = data || []; // Fallback to empty array if data is undefined
@@ -177,8 +178,8 @@ export default function UserRequests() {
                       {/* <TableCell align="left">
                         {row.contactnumber}
                       </TableCell> */}
-                      <TableCell align="left">
-                        <Button size='sm' color="primary" onClick={() => handleClickOpen(row.document1, row.document2, row.document3, row.document4)}>View</Button>
+                       <TableCell align="left">
+                        <Button size='sm' color="primary" onClick={() => handleClickOpen(row.proofOfId, row.proofOfAddress, row.financialInfo, row.creditScore)}>View</Button>
                       </TableCell>
                       <TableCell>
                           <Button size="sm" color="primary" onClick={() => handleOpenDisableDialog(row.userId)}>Disable</Button>

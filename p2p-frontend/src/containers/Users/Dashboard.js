@@ -76,17 +76,24 @@ export default function LandingPage() {
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
       {/* <AppAppBar mode={mode} toggleColorMode={toggleColorMode} /> */}
-      <Box sx={{ height: '100vh', overflowY: 'auto', bgcolor: 'background.default' }}>
+      <Box
+        sx={{
+          height: '100vh',
+          overflowY: 'auto',
+          bgcolor: 'grey.200', // Slightly darker light grey for better contrast
+          paddingTop: 1, // Less padding above Features
+        }}
+      >
         {/* Add the image element here */}
-        {/* <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 2 }}>
-          <img 
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: -16 }}>
+          {/* <img 
             src={pf} 
             alt="Peerfund logo" 
             style={{ maxWidth: '50%', height: 'auto' }} 
-          />
-        </Box> */}
+          /> */}
+        </Box>
         <Features />
-        <Divider />
+        {/* <Divider /> */}
         <Testimonials />
         <Divider />
         <Highlights />

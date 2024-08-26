@@ -165,7 +165,7 @@ export default function LoanRequests() {
                       <TableCell align="center">{row.interestRate}</TableCell>
                       <TableCell align="center">{row.repaymentPeriod}</TableCell>
                       <TableCell align="center">{row.total}</TableCell>
-                      <TableCell align="center">{row.status}</TableCell>
+                      <TableCell align="left">{row.status}</TableCell>
                       <TableCell align="left">
                         <Link
                           to={`/user/viewuser/${row.userId}`}

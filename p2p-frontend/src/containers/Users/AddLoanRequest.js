@@ -30,6 +30,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const useStyles = makeStyles(styles);
 
@@ -53,6 +55,16 @@ export default function AddloanRequest() {
   useEffect(() => {
     calculateTotal();
   }, [amount, interestRate, repaymentPeriod]);
+
+  const notifyError = (message) => toast.error(message, {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
 
   const [data, setData] = useState([]);
   const fetchloanRequests = () => {
@@ -114,6 +126,10 @@ export default function AddloanRequest() {
   };
 
   const handleSubmit = () => {
+    if (!amount || !interestRate || !repaymentPeriod) {
+      notifyError('All fields are required!');
+      return;
+    }
     if (validate()) {
       calculateTotal();
       const user = JSON.parse(window.localStorage.getItem('user'));
@@ -299,6 +315,8 @@ export default function AddloanRequest() {
           <Button onClick={handleDeleteConfirmed} color="primary">OK</Button>
         </DialogActions>
       </Dialog>
+      <ToastContainer />
+
     </GridContainer>
   );
 }

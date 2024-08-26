@@ -12,6 +12,7 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
 import EdgesensorHighRoundedIcon from '@mui/icons-material/EdgesensorHighRounded';
 import ViewQuiltRoundedIcon from '@mui/icons-material/ViewQuiltRounded';
+import pf from './../../components/Dashboard/Images/peerfund.png'; // Import the image
 
 const items = [
   {
@@ -258,10 +259,9 @@ export default function Features() {
                 width: 420,
                 height: 500,
                 backgroundSize: 'contain',
-                backgroundImage: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? items[selectedItemIndex].imageLight
-                    : items[selectedItemIndex].imageDark,
+                backgroundImage: `url(${pf})`, // Set the pf image as the background here
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
               }}
             />
           </Card>

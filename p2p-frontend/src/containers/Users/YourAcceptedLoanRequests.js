@@ -190,7 +190,7 @@ export default function LoanRequests() {
                             {row.acceptedByFirstName + " " + row.acceptedByLastName}
                           </Link>
                         </TableCell>
-                        <TableCell align="center">
+                        <TableCell align="left">
                           {row.status}
                         </TableCell>
                         <TableCell align="left">

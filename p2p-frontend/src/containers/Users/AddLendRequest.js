@@ -26,6 +26,8 @@ import TableRow from "@material-ui/core/TableRow";
 import SearchIcon from '@material-ui/icons/Search';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const useStyles = makeStyles(styles);
 
@@ -50,6 +52,16 @@ export default function AddLendRequest() {
   useEffect(() => {
     calculateTotal();
   }, [amount, interestRate, repaymentPeriod]);
+
+  const notifyError = (message) => toast.error(message, {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
 
   const fetchLendRequests = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
@@ -109,6 +121,11 @@ export default function AddLendRequest() {
   };
 
   const handleSubmit = () => {
+    if (!amount || !interestRate || !repaymentPeriod) {
+      notifyError('All fields are required!');
+      return;
+    }
+
     if (validate()) {
       calculateTotal();
       const user = JSON.parse(window.localStorage.getItem('user'));
@@ -127,6 +144,8 @@ export default function AddLendRequest() {
       }).catch(error => {
         console.error("There was an error creating the lend request!", error);
       });
+    } else {
+      notifyError('Please correct the errors in the form before submitting.');
     }
   };
 
@@ -198,9 +217,11 @@ export default function AddLendRequest() {
                   {rows.filter((row) => {
                     if (searchTerm === "") {
                       return row;
-                    } else if (row.name.toLowerCase().includes(searchTerm.toLowerCase()) || row.email.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    } else if (row.createdAt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               row.amount.toString().toLowerCase().includes(searchTerm.toLowerCase())) {
                       return row;
                     }
+                    return null;
                   }).map((row, id) => (
                     <TableRow key={id}>
                       <TableCell align="left">{row.createdAt}</TableCell>
@@ -223,7 +244,7 @@ export default function AddLendRequest() {
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Add New Loan Request</DialogTitle>
         <DialogContent>
-          <TextField
+        <TextField
             autoFocus
             margin="dense"
             id="amount"
@@ -269,28 +290,32 @@ export default function AddLendRequest() {
             type="number"
             fullWidth
             value={total}
-            InputProps={{
-              readOnly: true,
-            }}
+            disabled
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">Cancel</Button>
-          <Button onClick={handleSubmit} color="primary">Submit</Button>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            Submit
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog */}
       <Dialog open={confirmOpen} onClose={handleConfirmClose}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this lend request?
-        </DialogContent>
+        <DialogTitle>Are you sure you want to delete this request?</DialogTitle>
         <DialogActions>
-          <Button onClick={handleConfirmClose} color="primary">Cancel</Button>
-          <Button onClick={handleDeleteConfirmed} color="primary">OK</Button>
+          <Button onClick={handleConfirmClose} color="primary">
+            No
+          </Button>
+          <Button onClick={handleDeleteConfirmed} color="primary">
+            Yes
+          </Button>
         </DialogActions>
       </Dialog>
+
+      <ToastContainer />
     </GridContainer>
   );
 }

@@ -13,7 +13,7 @@ import LogoCollection from './../../components/mainLandingPage/LogoCollection';
 import Highlights from './../../components/mainLandingPage/Highlights';
 import Features from './../../components/mainLandingPage/Features';
 import Testimonials from './../../components/mainLandingPage/Testimonials';
-import FAQ from './../../components/mainLandingPage/Footer';
+import FAQ from './../../components/mainLandingPage/FAQ';
 import Footer from './../../components/mainLandingPage/Footer';
 import getLPTheme from './../../components/mainLandingPage/GetLpTheme';
 import pf from './../../components/Dashboard/Images/peerfund.png'; // Ensure the image is correctly imported
@@ -78,23 +78,19 @@ export default function LandingPage() {
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
       <AppAppBar mode={mode} toggleColorMode={toggleColorMode} />
-      <Box sx={{ bgcolor: 'background.default' }}>
+      <Box sx={{ bgcolor: 'grey.200' }}> {/* Change background color to grey */}
         {/* Add the image element here */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: -15 }}>  
-          <img 
-            src={pf} 
-            alt="Peerfund logo" 
-            style={{ maxWidth: '50%', height: 'auto' }} 
-          />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 0 }}>  
+          
         </Box>
         <Features />
         <Divider />
         <Testimonials />
         <Divider />
         <Highlights />
-        <Divider />
+        {/* <Divider />
         <FAQ />
-        <Divider />
+        <Divider /> */}
         {/* <Footer /> */}
       </Box>
       <ToggleCustomTheme

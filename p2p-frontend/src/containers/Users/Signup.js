@@ -15,6 +15,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Copyright(props) {
   return (
@@ -42,13 +44,44 @@ export default function SignUp() {
   const [creditScore, setCreditScore] = useState(null);
   const [redirect, setRedirect] = useState(false); // State to control redirection
 
+  const notifyError = (message) => toast.error(message, {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
+
   const handleFileChange = (setter) => (event) => {
     setter(event.target.files[0]);
   };
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    
+
+    // Validation logic
+    if (!firstName || !lastName || !email || !password || !proofOfId || !proofOfAddress || !financialInfo || !creditScore) {
+      notifyError('All fields are required!');
+      return;
+    }
+
+    if (password.length < 6) {
+      notifyError('Password must be at least 6 characters long!');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      notifyError('Please enter a valid email address!');
+      return;
+    }
+
     const form = new FormData();
     const userDto = JSON.stringify({
       firstName: firstName,
@@ -74,6 +107,7 @@ export default function SignUp() {
     })
     .catch((err) => {
       console.log(err);
+      notifyError('Signup Error!');
     });
   };
 
@@ -212,7 +246,7 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link href="/login" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>
@@ -220,6 +254,19 @@ export default function SignUp() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
+        <Box xs={12} sm={12} md={12}>
+        {/* <Copyright /> */}
+      </Box>
+      <ToastContainer position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       </Container>
     </ThemeProvider>
   );
