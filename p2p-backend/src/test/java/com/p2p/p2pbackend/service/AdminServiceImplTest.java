@@ -44,7 +44,6 @@ public class AdminServiceImplTest {
         userDto.setLastName("Malshan");
         userDto.setEmail("test@example.com");
 
-        // mock UserMapper static method
         MockedStatic<UserMapper> mockedStatic = mockStatic(UserMapper.class);
         mockedStatic.when(() -> UserMapper.mapToUserDto(any(User.class))).thenReturn(userDto);
     }
@@ -52,17 +51,13 @@ public class AdminServiceImplTest {
     @Test
     void testGetAllInactiveUsers() {
 
-        // test data
         List<User> inactiveUsers = new ArrayList<>();
         inactiveUsers.add(getTestUserDetails(1));
 
-        // mock repository
         Mockito.when(userRepository.findByActiveStatusFalse()).thenReturn(inactiveUsers);
 
-        // call test method
         List<UserDto> userDtoList = adminServiceImpl.getAllInactiveUsers();
 
-        // assertions
         Assertions.assertFalse(userDtoList.isEmpty());
         Assertions.assertEquals(inactiveUsers.get(0).getFirstName(), userDtoList.get(0).getFirstName());
     }
@@ -70,17 +65,13 @@ public class AdminServiceImplTest {
     @Test
     void testGetAllActiveUsers() {
 
-        // test data
         List<User> activeUsers = new ArrayList<>();
         activeUsers.add(getTestUserDetails(1));
 
-        // mock repository
         Mockito.when(userRepository.findByActiveStatusTrue()).thenReturn(activeUsers);
 
-        // call test method
         List<UserDto> userDtoList = adminServiceImpl.getAllActiveUsers();
 
-        // assertions
         Assertions.assertFalse(userDtoList.isEmpty());
         Assertions.assertEquals(activeUsers.get(0).getFirstName(), userDtoList.get(0).getFirstName());
     }
@@ -89,20 +80,16 @@ public class AdminServiceImplTest {
     void testAcceptNewUser() {
         User user = getTestUserDetails(10);
 
-        // mock repository
         Mockito.when(userRepository.findByUserId(Mockito.anyInt())).thenReturn(Optional.of(user));
         Mockito.when(userRepository.save(user)).thenReturn(user);
 
-        //mock email service
         Mockito.doNothing().when(emailService).sendSimpleEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         Map<String, Integer> requestMap = new HashMap<>();
         requestMap.put("userId", 10);
 
-        // call test method
         UserDto responseDto = adminServiceImpl.acceptNewUser(requestMap);
 
-        // assertions
         Assertions.assertEquals("Akila", responseDto.getFirstName());
     }
 
@@ -110,11 +97,9 @@ public class AdminServiceImplTest {
     void testDeleteUser() {
         User user = getTestUserDetails(10);
 
-        // mock repository
         Mockito.when(userRepository.findByUserId(10)).thenReturn(Optional.of(user));
         Mockito.when(userRepository.deleteById(10)).thenReturn(Optional.of(user));
 
-        //mock email service
         Mockito.doNothing().when(emailService).sendSimpleEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         Map<String, String> requestMap = new HashMap<>();
@@ -122,10 +107,8 @@ public class AdminServiceImplTest {
         requestMap.put("rejectReason", "user Removed");
         requestMap.put("email", "test@example.com");
 
-        // call test method
         boolean isEmpty = adminServiceImpl.deleteUser(requestMap);
 
-        // assertions
         Mockito.verify(userRepository).deleteById(10);
         Assertions.assertFalse(isEmpty);
     }
@@ -134,17 +117,14 @@ public class AdminServiceImplTest {
     void testDisableUsers() {
         User user = getTestUserDetails(10);
 
-        // mock repository
         Mockito.when(userRepository.findByUserId(10)).thenReturn(Optional.of(user));
         Mockito.when(userRepository.save(user)).thenReturn(user);
 
         Map<String, Integer> requestMap = new HashMap<>();
         requestMap.put("userId", 10);
 
-        // call test method
         UserDto userDto = adminServiceImpl.disableUsers(requestMap);
 
-        // assertions
         Assertions.assertEquals(10, userDto.getUserId());
     }
 

@@ -58,7 +58,11 @@ public class AdminController {
 
     @PostMapping("/users/disable")
     public ResponseEntity<UserDto> disableUser(@RequestBody Map<String, Integer> requestMap) {
-        UserDto disabledUser = adminService.disableUsers(requestMap);
-        return new ResponseEntity<>(disabledUser, HttpStatus.OK);
+        try {
+            UserDto disabledUser = adminService.disableUsers(requestMap);
+            return new ResponseEntity<>(disabledUser, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 }
