@@ -20,12 +20,7 @@ import CardHeader from "../../components/Dashboard/Card/CardHeader.js";
 import CardBody from "../../components/Dashboard/Card/CardBody.js";
 import Button from "../../components/Dashboard/Button/Button.js";
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import CheckoutForm from '../../components/mainLandingPage/CheckOutForm.js'; 
 import { Link } from 'react-router-dom';
-
-const stripePromise = loadStripe('your-publishable-key');
 
 const useStyles = makeStyles(styles);
 
@@ -33,7 +28,6 @@ export default function LoanRequests() {
   const classes = useStyles();
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState(""); 
-  const [openPayment, setOpenPayment] = useState(false);
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [openRateDialog, setOpenRateDialog] = useState(false);
   const [selectedLoanRequestId, setSelectedLoanRequestId] = useState(null);
@@ -50,9 +44,23 @@ export default function LoanRequests() {
     setSelectedLoanRequestId(null);
   };
 
-  const handleConfirm = async () => {
-    setOpenConfirm(false);
-    setOpenPayment(true);
+  const handleConfirm = () => {
+    if (!selectedLoanRequestId) {
+      console.error("Loan Request ID must be provided");
+      setOpenConfirm(false);
+      return;
+    }
+
+    axios.post(`${backendUrl}/users/loanrequests/payback`, { loanRequestId: selectedLoanRequestId })
+      .then(res => {
+        console.log("Payback successful:", res.data);
+        fetchData(); // Refresh data after successful payback
+        setOpenConfirm(false);
+      })
+      .catch(err => {
+        console.error("Error during payback:", err);
+        setOpenConfirm(false);
+      });
   };
 
   const handleOpenRateDialog = (LoanRequestId, acceptedUserId) => {
@@ -83,12 +91,6 @@ export default function LoanRequests() {
     });
   };
 
-  const handlePaymentSuccess = () => {
-    
-    setOpenPayment(false);
-    fetchData(); 
-  };
-
   const fetchData = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
     const userId = user.userId;
@@ -100,7 +102,7 @@ export default function LoanRequests() {
         console.error("Error fetching data:", err);
       });
   };
-  
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -217,7 +219,7 @@ export default function LoanRequests() {
           Confirm Action
         </DialogTitle>
         <DialogContent dividers>
-          Are you sure you want to accept it?
+          Are you sure you want to pay back this loan?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirm} color="primary">
@@ -225,29 +227,6 @@ export default function LoanRequests() {
           </Button>
           <Button onClick={handleConfirm} color="primary">
             Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Payment Dialog */}
-      <Dialog 
-        onClose={() => setOpenPayment(false)} 
-        aria-labelledby="payment-dialog-title" 
-        open={openPayment}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="payment-dialog-title">
-          Payment
-        </DialogTitle>
-        <DialogContent>
-          <Elements stripe={stripePromise}>
-            <CheckoutForm onClose={() => setOpenPayment(false)} onPaymentSuccess={handlePaymentSuccess} />
-          </Elements>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenPayment(false)} color="primary">
-            Cancel
           </Button>
         </DialogActions>
       </Dialog>

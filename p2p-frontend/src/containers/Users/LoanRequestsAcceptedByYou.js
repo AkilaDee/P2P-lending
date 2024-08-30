@@ -178,9 +178,9 @@ export default function LoanRequests() {
                         {(row.status === 'CLOSED' || row.status === 'CLOSED/Rated by Requester') && (
                           <Button size="sm" color="primary" onClick={() => handleOpenRateDialog(row.lendRequestId, row.userId)}>Rate</Button>
                         )}
-                        {!(row.status === 'CLOSED' || row.status === 'CLOSED/Rated by Requester') && (
+                        {/* {!(row.status === 'CLOSED' || row.status === 'CLOSED/Rated by Requester') && (
                           <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.lendRequestId)}>Accept</Button>
-                        )}
+                        )} */}
                       </TableCell>
                     </TableRow>
                   ))}

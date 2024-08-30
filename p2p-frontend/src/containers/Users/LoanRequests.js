@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-key */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import { backendUrl } from '../../UrlConfig.js';
 import TableScrollbar from 'react-table-scrollbar';
@@ -27,105 +26,82 @@ import Button from "../../components/Dashboard/Button/Button.js";
 import { Link } from 'react-router-dom';
 
 import styles from "../../components/Dashboard/Styles/DashboardStyles.js";
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-
-const stripePromise = loadStripe('your-publishable-key');
 
 const useStyles = makeStyles(styles);
-
-function CheckoutForm({ amount, onPaymentSuccess }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [error, setError] = useState(null);
-  const [processing, setProcessing] = useState(false);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setProcessing(true);
-
-    const { data: { clientSecret } } = await axios.post('/create-payment-intent', { amount });
-
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-      },
-    });
-
-    if (error) {
-      setError(error.message);
-      setProcessing(false);
-    } else if (paymentIntent.status === 'succeeded') {
-      setProcessing(false);
-      onPaymentSuccess();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <CardElement />
-      {error && <div>{error}</div>}
-      <button type="submit" disabled={!stripe || processing}>
-        {processing ? 'Processing...' : 'Pay'}
-      </button>
-    </form>
-  );
-}
 
 export default function LendRequests() {
   const classes = useStyles();
   const [searchTerm, setSearchTerm] = useState("");
   const [openConfirm, setOpenConfirm] = useState(false);
-  const [openPayment, setOpenPayment] = useState(false);
   const [selectedLoanRequestId, setSelectedLoanRequestId] = useState(null);
+  const [data, setData] = useState([]);
 
+  
   const handleClickOpenConfirm = (loanRequestId) => {
+    console.log("Opening confirm dialog for loan request ID:", loanRequestId); // Debugging line
     setSelectedLoanRequestId(loanRequestId);
     setOpenConfirm(true);
   };
 
+  
   const handleCloseConfirm = () => {
     setOpenConfirm(false);
     setSelectedLoanRequestId(null);
   };
 
-  const handleConfirm = async () => {
+  
+  const handleConfirm = () => {
+    if (selectedLoanRequestId) {
+      console.log("Confirming loan request ID:", selectedLoanRequestId); 
+      handlePaymentSuccess();
+    } else {
+      console.error("No loan request ID available."); 
+    }
     setOpenConfirm(false);
-    setOpenPayment(true);
   };
 
+  
   const handlePaymentSuccess = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
+    if (!user || !user.userId) {
+      console.error("User ID not found in local storage.");
+      return;
+    }
     const userId = user.userId;
-    axios.post(`${backendUrl}/users/loanrequests/accept`, { loanRequestId: selectedLoanRequestId, acceptorId: userId })
+
+    axios.post(`${backendUrl}/users/loanrequests/accept`, { 
+        loanRequestId: selectedLoanRequestId, 
+        acceptorId: userId 
+      })
       .then((response) => {
-        console.log(response);
-        fetchData();
+        console.log("Loan request accepted:", response);
+        fetchData();  
       })
       .catch((err) => {
-        console.log(err);
+        console.error("Error accepting loan request:", err);
       });
-    setOpenPayment(false);
   };
 
-  const [data, setData] = useState([]);
+  
   const fetchData = () => {
     const user = JSON.parse(window.localStorage.getItem('user'));
+    if (!user || !user.userId) {
+      console.error("User ID not found in local storage.");
+      return;
+    }
     const userId = user.userId;
+
     axios.post(`${backendUrl}/users/loanrequests/exclude`, { userId: userId })
       .then(res => {
         setData(res.data);
+        
       })
       .catch(err => {
         console.error("Error fetching data:", err);
       });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -156,9 +132,7 @@ export default function LendRequests() {
                       <SearchIcon />
                     </InputAdornment>
                   }
-                  onChange={(event) => {
-                    setSearchTerm(event.target.value);
-                  }}
+                  onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search..."
                   fontSize="small"
                   size="sm"
@@ -183,6 +157,7 @@ export default function LendRequests() {
                     } else if (row.name.toLowerCase().includes(searchTerm.toLowerCase()) || row.email.toLowerCase().includes(searchTerm.toLowerCase())) {
                       return row;
                     }
+                    return false;  
                   }).map((row, id) => (
                     <TableRow key={id}>
                       <TableCell align="left">
@@ -201,13 +176,13 @@ export default function LendRequests() {
                         {row.total}
                       </TableCell>
                       <TableCell align="center">
-                          <Link
-                            to={`/user/viewuser/${row.requestedUserId}`}
-                            style={{ textDecoration: 'underline', color: 'inherit' }}
-                          >
-                            {row.requestedByFirstName + " " + row.requestedByLastName}
-                          </Link>
-                        </TableCell>
+                        <Link
+                          to={`/user/viewuser/${row.requestedUserId}`}
+                          style={{ textDecoration: 'underline', color: 'inherit' }}
+                        >
+                          {row.requestedByFirstName + " " + row.requestedByLastName}
+                        </Link>
+                      </TableCell>
                       <TableCell align="left">
                         <Button size="sm" color="primary" onClick={() => handleClickOpenConfirm(row.loanRequestId)}>Accept</Button>
                       </TableCell>
@@ -220,6 +195,7 @@ export default function LendRequests() {
         </Card>
       </GridItem>
 
+      
       <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
         <DialogTitle id="confirm-dialog-title">
           Confirm Action
@@ -233,28 +209,6 @@ export default function LendRequests() {
           </Button>
           <Button onClick={handleConfirm} color="primary">
             Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog 
-        onClose={() => setOpenPayment(false)} 
-        aria-labelledby="payment-dialog-title" 
-        open={openPayment}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle id="payment-dialog-title">
-          Payment
-        </DialogTitle>
-        <DialogContent>
-          <Elements stripe={stripePromise}>
-            <CheckoutForm amount={10000} onPaymentSuccess={handlePaymentSuccess} />
-          </Elements>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenPayment(false)} color="primary">
-            Cancel
           </Button>
         </DialogActions>
       </Dialog>

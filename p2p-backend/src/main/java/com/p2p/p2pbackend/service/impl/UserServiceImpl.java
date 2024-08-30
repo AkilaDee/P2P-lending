@@ -222,6 +222,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LendRequestDto payLendRequest(Map<String, Integer> requestMap) {
+        if (requestMap == null) {
+            throw new IllegalArgumentException("Request map cannot be null.");
+        }
         int lendRequestId = requestMap.get("lendRequestId");
 
         LendRequest lendRequest = lendRequestRepository.findById(lendRequestId)
@@ -328,7 +331,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Loan request not found"));
 
 
-        loanRequest.setStatus("PAID");
+        loanRequest.setStatus("CLOSED");
         loanRequest.setUpdatedAt(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
 
         loanRequest = loanRequestRepository.save(loanRequest);
@@ -540,7 +543,7 @@ public class UserServiceImpl implements UserService {
             String lastName = (String) result[3];
 
             return new Object() {
-                public final int lendRequestId = loanRequest.getLoanRequestId();
+                public final int loanRequestId = loanRequest.getLoanRequestId();
                 public final int userId = loanRequest.getUser().getUserId();
                 public final Double amount = loanRequest.getAmount();
                 public final Double total = loanRequest.getTotal();

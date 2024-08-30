@@ -164,7 +164,7 @@ export default function AddloanRequest() {
     { id: 'interestRate', label: 'Interest Rate' },
     { id: 'repaymentPeriod', label: 'Repayment Period' },
     { id: 'total', label: 'Total' },
-    { id: 'accept', label: 'Accept' },
+    { id: 'delete', label: 'Delete' },
   ];
   const rows = data;
 
