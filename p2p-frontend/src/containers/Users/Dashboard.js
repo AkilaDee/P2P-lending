@@ -14,7 +14,7 @@ import Highlights from './../../components/mainLandingPage/Highlights';
 import FAQ from './../../components/mainLandingPage/Footer';
 import Footer from './../../components/mainLandingPage/Footer';
 import getLPTheme from './../../components/mainLandingPage/GetLpTheme';
-import pf from './../../components/Dashboard/Images/peerfund.png'; // Ensure the image is correctly imported
+import pf from './../../components/Dashboard/Images/peerfund.png'; 
 
 function ToggleCustomTheme({ showCustomTheme, toggleCustomTheme }) {
   return (
@@ -75,16 +75,16 @@ export default function LandingPage() {
   return (
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
-      {/* <AppAppBar mode={mode} toggleColorMode={toggleColorMode} /> */}
+      
       <Box
         sx={{
           height: '100vh',
           overflowY: 'auto',
-          bgcolor: 'grey.200', // Slightly darker light grey for better contrast
-          paddingTop: 1, // Less padding above Features
+          bgcolor: 'grey.200', 
+          paddingTop: 1, 
         }}
       >
-        {/* Add the image element here */}
+        
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: -16 }}>
           {/* <img 
             src={pf} 

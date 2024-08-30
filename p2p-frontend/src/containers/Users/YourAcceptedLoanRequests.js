@@ -76,7 +76,7 @@ export default function LoanRequests() {
     .then(response => {
       console.log("Rating saved:", response.data);
       setOpenRateDialog(false);
-      fetchData(); // Refresh data after submitting the rating
+      fetchData(); 
     })
     .catch(err => {
       console.error("Error saving rating:", err);
@@ -84,9 +84,9 @@ export default function LoanRequests() {
   };
 
   const handlePaymentSuccess = () => {
-    // Assuming that you have a way to capture when the payment is successful
+    
     setOpenPayment(false);
-    fetchData(); // Refresh data after payment success
+    fetchData(); 
   };
 
   const fetchData = () => {

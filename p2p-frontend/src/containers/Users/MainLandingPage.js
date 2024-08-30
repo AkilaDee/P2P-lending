@@ -78,8 +78,8 @@ export default function LandingPage() {
     <ThemeProvider theme={showCustomTheme ? LPtheme : defaultTheme}>
       <CssBaseline />
       <AppAppBar mode={mode} toggleColorMode={toggleColorMode} />
-      <Box sx={{ bgcolor: 'grey.200' }}> {/* Change background color to grey */}
-        {/* Add the image element here */}
+      <Box sx={{ bgcolor: 'grey.200' }}> 
+        
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6, mb: 0 }}>  
           
         </Box>

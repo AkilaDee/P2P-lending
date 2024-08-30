@@ -124,7 +124,7 @@ export default function LendRequests() {
     axios.post(`${backendUrl}/users/lendrequests/pay`, { loanRequestId: selectedLendRequestId, payerId: userId })
       .then((response) => {
         console.log(response);
-        fetchData(); // Refresh the data after payment
+        fetchData(); 
       })
       .catch((err) => {
         console.log(err);
@@ -141,7 +141,7 @@ export default function LendRequests() {
     .then(response => {
       console.log("Rating saved:", response.data);
       setOpenRateDialog(false);
-      fetchData(); // Refresh the data after rating
+      fetchData(); 
     })
     .catch(err => {
       console.error("Error saving rating:", err);
@@ -279,13 +279,13 @@ export default function LendRequests() {
         </Card>
       </GridItem>
             
-      {/* view documents dialogbox */}
+      
       <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
       <DialogTitle id="confirm-dialog-title">
         Confirm Action
       </DialogTitle>
       <DialogContent dividers>
-        {/* <Typography gutterBottom> */}
+       
           Are you sure you want to accept it?
         {/* </Typography> */}
       </DialogContent>

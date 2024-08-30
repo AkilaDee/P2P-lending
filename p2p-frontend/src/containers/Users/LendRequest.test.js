@@ -4,8 +4,7 @@ import axios from 'axios';
 import LendRequests from './LendRequests';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { backendUrl } from '../../UrlConfig.js';
-import '@testing-library/jest-dom/extend-expect'; // Add this line
-
+import '@testing-library/jest-dom/extend-expect'; 
 // Mock axios
 jest.mock('axios');
 
@@ -127,7 +126,6 @@ describe('LendRequests Component', () => {
       expect(screen.getByText('2024-08-01')).toBeInTheDocument();
     });
 
-    // Use role and name for more specificity
     fireEvent.click(screen.getByRole('button', { name: /accept/i }));
 
     expect(screen.getByText('Confirm Action')).toBeInTheDocument();

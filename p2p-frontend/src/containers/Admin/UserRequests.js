@@ -112,7 +112,7 @@ export default function UserRequests() {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
-      setState(reader.result); // Update the state with Base64 string
+      setState(reader.result); 
     };
   };
 
@@ -128,7 +128,7 @@ export default function UserRequests() {
     }
   };
 
-  // Fetch inactive users from the backend
+  
   const [data, setData] = useState([]);
   const getData = () => {
     axios.get(`${backendUrl}/admin/users/inactive`)

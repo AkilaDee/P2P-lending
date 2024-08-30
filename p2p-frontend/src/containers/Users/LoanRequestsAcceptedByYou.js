@@ -191,7 +191,7 @@ export default function LoanRequests() {
         </Card>
       </GridItem>
 
-      {/* Confirm Dialog */}
+      
       <Dialog onClose={handleCloseConfirm} aria-labelledby="confirm-dialog-title" open={openConfirm}>
         <DialogTitle id="confirm-dialog-title">Confirm Action</DialogTitle>
         <DialogContent dividers>
@@ -203,7 +203,7 @@ export default function LoanRequests() {
         </DialogActions>
       </Dialog>
 
-      {/* Rate Dialog */}
+      
       <Dialog
         onClose={handleCloseRateDialog}
         aria-labelledby="rate-dialog-title"

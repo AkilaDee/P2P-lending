@@ -26,7 +26,7 @@ const useStyles = makeStyles(styles);
 
 export default function LendRequests() {
   const classes = useStyles();
-  const [searchTerm, setSearchTerm] = useState(""); //for search function
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [openConfirm, setOpenConfirm] = useState(false);
   const [selectedLendRequestId, setSelectedLendRequestId] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -76,7 +76,7 @@ export default function LendRequests() {
     axios.post(`${backendUrl}/users/lendrequests/payback`, { lendRequestId: selectedLendRequestId })
       .then(response => {
         console.log(response);
-        fetchData(); // Refresh data after confirmation
+        fetchData(); 
       })
       .catch(err => {
         console.log(err);
@@ -93,7 +93,7 @@ export default function LendRequests() {
     .then(response => {
       console.log("Rating saved:", response.data);
       setOpenRateDialog(false);
-      fetchData(); // Refresh data after rating submission
+      fetchData(); 
     })
     .catch(err => {
       console.error("Error saving rating:", err);

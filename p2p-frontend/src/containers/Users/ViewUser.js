@@ -25,7 +25,7 @@ export default function ViewUser() {
     firstName: '',
     lastName: '',
     // email: '',
-    rating: 0 // Initialize with a default rating value
+    rating: 0 
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

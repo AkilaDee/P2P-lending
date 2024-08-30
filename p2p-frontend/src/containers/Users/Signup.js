@@ -111,7 +111,7 @@ export default function SignUp() {
     });
   };
 
-  // If redirect state is true, redirect to the dashboard
+  
   if (redirect) {
     return <Redirect to="/" />;
   }
