@@ -36,8 +36,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Modifying
     @Query(value =
-            "INSERT INTO users (first_name, last_name, email, password, " +
-                    "proof_of_id, proof_of_address, credit_score, financial_info) " +
+            "INSERT INTO users (first_name, last_name, email, password, " + "proof_of_id, proof_of_address, credit_score, financial_info) " +
                     "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)", nativeQuery = true)
     void createUser(String firstName, String lastName, String email,
                     String password, byte[] proofOfId,

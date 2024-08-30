@@ -35,5 +35,4 @@ public class LoanRequest {
     @JoinColumn(name = "accepted_by")
     private User acceptedBy;
 
-    // Getters and setters
 }

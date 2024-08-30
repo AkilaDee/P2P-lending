@@ -40,9 +40,6 @@ import java.util.Arrays;
 public class UserController {
 
     private final UserRepository userRepository;
-    private final LendRequestRepository lendRequestRepository;
-    private final LoanRequestRepository loanRequestRepository;
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private UserService userService;
 
@@ -123,7 +120,7 @@ public class UserController {
     }
 
     @PostMapping("/lendrequests/pending")
-    public ResponseEntity<List<LendRequestDto>> getAllpendingLendRequestsForUser(@RequestBody Map<String, Integer> requestMap) {
+    public ResponseEntity<List<LendRequestDto>> getAllPendingLendRequestsForUser(@RequestBody Map<String, Integer> requestMap) {
         List<LendRequestDto> lendRequestDtos = userService.getAllPendingLendRequestsForUser(requestMap);
         return new ResponseEntity<>(lendRequestDtos, HttpStatus.OK);
     }

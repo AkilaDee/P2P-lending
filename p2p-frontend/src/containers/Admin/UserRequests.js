@@ -134,12 +134,12 @@ export default function UserRequests() {
     axios.get(`${backendUrl}/admin/users/inactive`)
       .then(res => {
         const results = res.data;
-        setData(results); // Ensure data is an array
+        setData(results); 
         console.log(res);
       })
       .catch(err => {
         console.log(err);
-        setData([]); // Set empty array on error
+        setData([]); 
       });
   };
 
@@ -156,7 +156,7 @@ export default function UserRequests() {
     { id: 'reject', label: 'Reject' },
   ];
 
-  const rows = data || []; // Fallback to empty array if data is undefined
+  const rows = data || []; 
 
   return (
     <GridContainer>

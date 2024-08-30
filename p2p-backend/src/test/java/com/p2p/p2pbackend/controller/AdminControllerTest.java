@@ -89,7 +89,7 @@ public class AdminControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(userId, response.getBody().getUserId());
-        assertEquals(false, response.getBody().getActiveStatus()); // Use getActiveStatus() method
+        assertEquals(false, response.getBody().getActiveStatus());
 
         verify(adminService, times(1)).disableUsers(requestMap);
     }

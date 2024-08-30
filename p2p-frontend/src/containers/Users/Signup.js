@@ -103,7 +103,7 @@ export default function SignUp() {
     })
     .then((response) => {
       console.log(response);
-      setRedirect(true); // Set redirect state to true on success
+      setRedirect(true); 
     })
     .catch((err) => {
       console.log(err);

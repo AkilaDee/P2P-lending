@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     LoanRequestRepository loanRequestRepository;
     LendRequestRepository lendRequestRepository;
+
     @Override
     public UserDto createUser(UserDto userDto) {
         // Map DTO to entity
@@ -365,6 +366,7 @@ public class UserServiceImpl implements UserService {
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRating(5.0);
 
         userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)

@@ -15,10 +15,10 @@ public class UserDto {
     private String lastName;
     private String email;
     private String password;
-    private byte[] proofOfId;        // Changed to byte[]
-    private byte[] proofOfAddress;   // Changed to byte[]
-    private byte[] financialInfo;    // Changed to byte[]
-    private byte[] creditScore;      // Changed to byte[]
+    private byte[] proofOfId;
+    private byte[] proofOfAddress;
+    private byte[] financialInfo;
+    private byte[] creditScore;
     private boolean activeStatus;
     private double rating;
     private int ratingCount;

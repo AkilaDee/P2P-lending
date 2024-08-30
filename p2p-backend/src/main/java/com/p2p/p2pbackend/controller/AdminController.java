@@ -20,10 +20,6 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AdminController {
 
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final EmailService emailService;
-
     @Autowired
     private AdminService adminService;
 
@@ -39,7 +35,6 @@ public class AdminController {
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
-
     @PostMapping("users/delete")
     public ResponseEntity<UserDto> deleteUser(@RequestBody Map<String, String> requestMap) {
         boolean isDeleted = adminService.deleteUser(requestMap);
@@ -54,7 +49,6 @@ public class AdminController {
         List<UserDto> allUsers = adminService.getAllActiveUsers();
         return new ResponseEntity<>(allUsers, HttpStatus.OK);
     }
-
 
     @PostMapping("/users/disable")
     public ResponseEntity<UserDto> disableUser(@RequestBody Map<String, Integer> requestMap) {
