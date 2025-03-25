@@ -1,5 +1,5 @@
-# P2P-lending
-Code base of PeerFund 
+# PeerFund (P2P-Lending)
+Codebase of Peerfund
 
 # Read Me Template
 
