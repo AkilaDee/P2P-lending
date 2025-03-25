@@ -22,7 +22,7 @@ PeerFund is an innovative online platform designed to facilitate seamless lendin
 ● Ensure System Performance and Security: Conduct comprehensive testing to evaluate the platform's performance, reliability, scalability, and security measures, addressing any identified vulnerabilities or performance issues.
 
 
-#### Technologies
+## Technologies
 
 ● Spring Boot
 Scalable, secure, and efficient framework.
@@ -36,7 +36,7 @@ Rich ecosystem, community support, flexible and reusable code.
 Open-source, cost-effective, SQL-compliant.
 Advanced indexing, JSON data support, scalability, security features.
 
-#### Backend Development
+## Backend Development
 
 ● Technologies: Spring Boot, Spring Data JPA, PostgreSQL.
 
@@ -55,7 +55,7 @@ Advanced indexing, JSON data support, scalability, security features.
 ● Version controlling using GitHub
 
 
-#### Frontend Development
+## Frontend Development
 ● React
 
 ● Material-UI: Pre-designed components for modern UI.
@@ -69,7 +69,8 @@ Advanced indexing, JSON data support, scalability, security features.
 ● Features: Component-based architecture, responsive design, routing, and seamless API communication.
 
 
-####Feature Enhancements
+## Feature Enhancements
+
 ● Payment Guarantee System: Implement functionality to ensure loan repayment.
 
 ● Cloud Storage Integration: Use cloud services like Amazon S3 for document management, enhancing scalability and data handling.
@@ -80,9 +81,14 @@ Advanced indexing, JSON data support, scalability, security features.
 
 ● Loan and Lend Suggestions: Introduce a recommendation system based on user search behavior to improve engagement.
 
-####Performance Improvements
+## Performance Improvements
+
 ● API Optimization: Reduce latency and increase data throughput by streamlining API endpoints and minimizing data transfer.
+
 ● Load Balancing: Distribute network traffic across multiple servers to prevent bottlenecks and improve reliability.
+
 ● Caching: Use caching technologies to reduce server load and speed up content delivery.
+
 ● Enhanced Security: Introduce token-based session management and more complex hashing algorithms to protect user data and prevent attacks.
+
 
